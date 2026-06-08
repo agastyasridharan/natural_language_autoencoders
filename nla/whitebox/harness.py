@@ -55,7 +55,7 @@ from nla.arch_adapters import (  # noqa: E402
 )
 from nla.config import NLAConfig, load_nla_config  # noqa: E402
 from nla.injection import inject_at_marked_positions  # noqa: E402
-from nla.schema import EXPLANATION_RE, normalize_activation  # noqa: E402
+from nla.schema import EXPLANATION_RE, chat_template_token_ids, normalize_activation  # noqa: E402
 from nla.whitebox.constants import RELEASED, ReleasedNLA  # noqa: E402
 from nla_inference import NLACritic  # noqa: E402
 
@@ -268,7 +268,7 @@ class WhiteBoxNLA:
         model's default system prompt (Qwen) and the assistant scaffold.
         """
         tok = self.extractor_tokenizer
-        prompt_ids = tok.apply_chat_template(messages, tokenize=True, add_generation_prompt=True)
+        prompt_ids = chat_template_token_ids(tok, messages)
         prompt_len = len(prompt_ids)
 
         if reply_text is not None:
@@ -355,9 +355,7 @@ class WhiteBoxNLA:
         """
         cfg = self.cfg
         content = cfg.actor_prompt_template.format(injection_char=cfg.injection_char)
-        ids = self.tokenizer.apply_chat_template(
-            [{"role": "user", "content": content}], tokenize=True, add_generation_prompt=True
-        )
+        ids = chat_template_token_ids(self.tokenizer, [{"role": "user", "content": content}])
         ids_t = torch.tensor(ids, dtype=torch.long).unsqueeze(0)
 
         text_model = resolve_text_model(self.av)

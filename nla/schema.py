@@ -200,6 +200,40 @@ def load_predict_mean_baselines(
     return compute_predict_mean_baselines(V, mse_scale)
 
 
+def chat_template_token_ids(
+    tokenizer: Any,
+    messages: list[dict],
+    *,
+    add_generation_prompt: bool = True,
+) -> list[int]:
+    """Tokenize a chat conversation to a flat list[int], version-robustly.
+
+    `tokenizer.apply_chat_template(tokenize=True)` returns a flat list[int] on
+    some transformers versions but a dict-like BatchEncoding on others (when
+    `return_dict` defaults to True). Feeding the latter to `torch.tensor` /
+    `enumerate` iterates its string keys ('input_ids', 'attention_mask') —
+    "'str'/'dict' object cannot be interpreted as an integer". Force the flat
+    path and normalize whatever the installed version returns.
+
+    `return_tensors`/`return_dict` only change the output container, never the
+    token sequence, so neighbor checks are unaffected.
+    """
+    enc = tokenizer.apply_chat_template(
+        messages,
+        tokenize=True,
+        add_generation_prompt=add_generation_prompt,
+        return_dict=False,
+        return_tensors="pt",
+    )
+    if hasattr(enc, "input_ids"):  # BatchEncoding even with return_dict=False
+        enc = enc["input_ids"]
+    if hasattr(enc, "tolist"):     # torch tensor (usually [1, T])
+        enc = enc.tolist()
+    if enc and isinstance(enc[0], (list, tuple)):  # drop the batch dim
+        enc = enc[0]
+    return [int(x) for x in enc]
+
+
 def compute_canonical_neighbors(
     tokenizer: Any,
     actor_template: str,
@@ -217,11 +251,7 @@ def compute_canonical_neighbors(
     (<concept>㊗</concept>) so the trailing chat-template scaffolding is identical.
     """
     content = actor_template.format(injection_char=injection_char)
-    ids = tokenizer.apply_chat_template(
-        [{"role": "user", "content": content}],
-        tokenize=True,
-        add_generation_prompt=True,
-    )
+    ids = chat_template_token_ids(tokenizer, [{"role": "user", "content": content}])
     matches = [i for i, tid in enumerate(ids) if tid == injection_token_id]
     assert len(matches) == 1, (
         f"injection token id {injection_token_id} ({injection_char!r}) appears "
