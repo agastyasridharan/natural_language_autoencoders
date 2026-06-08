@@ -25,7 +25,11 @@ python -m nla.whitebox.cli e1 --released qwen2.5-7b-L20 \
 from __future__ import annotations
 
 import argparse
+import os
 import sys
+
+# Reduce CUDA fragmentation on small/shared GPUs (set before any torch import).
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
 from nla.whitebox.constants import RELEASED
 
@@ -100,6 +104,7 @@ def cmd_e1(args) -> int:
     idxs = [i for i in range(len(acts)) if i >= args.min_position]
     vecs = acts.residuals[idxs]
     labels = [acts.token_strs[i] for i in idxs]
+    nla.unload_extractor()  # free the extractor before the AV loads (small-GPU safe)
     res = run_e1(nla, vecs, labels=labels, out_path=args.out)
     print(summarize_e1(res, cos_threshold=args.cos_threshold))
     if args.out:
@@ -115,11 +120,16 @@ def cmd_decode(args) -> int:
     messages = [{"role": "user", "content": conv.user_message if conv else args.prompt}]
     acts = nla.extract_conversation(messages, generate_reply=True, max_new_tokens=args.max_new_tokens)
     p = args.position
-    rt = nla.round_trip(acts.residuals[p], baseline=_baseline(args), greedy=True,
-                        max_new_tokens=args.max_new_tokens)
-    print(f"position {p} token={acts.token_strs[p]!r}  ||v||={float(acts.residuals[p].norm()):.1f}")
-    print(f"  mse_nrm={rt.mse_nrm:.3f}  cos={rt.cos:.3f}  fve_nrm={rt.fve_nrm:.3f}")
-    print(f"  explanation: {rt.explanation}")
+    activation = acts.residuals[p]
+    token, norm = acts.token_strs[p], float(activation.norm())
+    nla.unload_extractor()  # stage: free extractor before AV
+    expl = nla.verbalize(activation, greedy=True, max_new_tokens=args.max_new_tokens)
+    nla.unload_av()         # stage: free AV before AR
+    mse, cos = nla.score(expl, activation)
+    fve = nla.fve_nrm(mse, _baseline(args))
+    print(f"position {p} token={token!r}  ||v||={norm:.1f}")
+    print(f"  mse_nrm={mse:.3f}  cos={cos:.3f}  fve_nrm={fve:.3f}")
+    print(f"  explanation: {expl}")
     return 0
 
 

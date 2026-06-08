@@ -1,34 +1,30 @@
 # Running the white-box gate on Colab Pro+ (A100 80 GB)
 
-On an A100 80 GB all three models fit resident in bf16 (~15 + 15 + 11 ≈ 42 GB),
-so you can run the full gate (extract → L1 → L2) and E1 with **no staging**.
-Budget ~15–25 min for a cold session — almost all of it is the ~41 GB weight
-download; the actual compute is < 10 min.
+The gate **stages** the models — it frees each before loading the next — so
+peak GPU memory is ~one 7B model (~15 GB). It runs on whatever Colab Pro+ hands
+you this session (an L4/A10 at ~22 GB, or an A100). Budget ~15–25 min for a cold
+session — almost all of it is the ~41 GB weight download; compute is < 10 min.
 
-> **Runtime → Change runtime type → A100 GPU, High-RAM.** Confirm with
-> `!nvidia-smi` that you got an A100 (80 GB). Colab assigns A100s on Pro+ but
-> not every session.
+> **Runtime → Change runtime type → GPU + High-RAM** (A100 if offered; an L4 or
+> A10 at ~22 GB also works — the gate stages to fit ~16 GB+). Check which you
+> got with `!nvidia-smi`.
 
 ## 0. Get this code onto Colab
 
-A plain `git clone` of upstream **won't include `nla/whitebox/`** — it's local
-work. Two options:
-
-- **Push a branch (recommended).** Push your branch with `nla/whitebox/` to a
-  remote you can read on Colab (your fork, or `kitft/...` if you have access),
-  then clone *that* branch in cell 1. (Ask me to commit + push it for you — see
-  the chat.)
-- **Upload the folder.** Clone upstream (cell 1), then drag the local
-  `nla/whitebox/` folder into `…/natural_language_autoencoders/nla/` via the
-  Colab file browser, or copy it from a mounted Google Drive.
+A plain `git clone` of upstream `main` **won't include `nla/whitebox/`** — it
+lives on the **`whitebox-harness`** branch of the fork
+`github.com/agastyasridharan/natural_language_autoencoders`, which cell 1 below
+clones directly. (The fork is public; if you've made it private, run
+`login()` in §2 first or the clone needs a token.)
 
 ## 1. Clone + install
 
 ```python
-# cell 1 — clone (point BRANCH/URL at wherever nla/whitebox/ lives)
-!git clone -b main https://github.com/kitft/natural_language_autoencoders.git
+# cell 1 — clone the fork's whitebox-harness branch (this is where nla/whitebox/ lives)
+!git clone -b whitebox-harness https://github.com/agastyasridharan/natural_language_autoencoders.git
 %cd natural_language_autoencoders
-!git log --oneline -1
+!git log --oneline -1          # expect: 2309cdb Add white-box harness ...
+!ls nla/whitebox/             # sanity: harness.py, gate.py, cli.py present
 ```
 
 ```python

@@ -143,23 +143,37 @@ def run_gate(
         report.passed = norm_ok
         return report
 
+    # Free the extractor before loading the AR/AV. On a ~16–24 GB GPU a 7B
+    # extractor (~15 GB) can't co-reside with the AR (~11 GB) or AV (~15 GB);
+    # the activations are already cached on CPU, so the extractor is dead weight.
+    nla.unload_extractor()
+
     # ── L1 / L2 per-position scoring ──────────────────────────────────────────
     end_to_end = level == "L2"
     checks: list[PositionCheck] = []
     got_records: list[el.PositionRecord] = []
     dcos: list[float] = []
 
+    # L2 in TWO passes so the AV and AR never co-reside: generate every
+    # explanation with the AV, free it, then score them all with the AR.
+    explanations: dict[int, str] = {}
+    if end_to_end:
+        for p in range(min_position, n):  # system-prompt region (idx<min) is summarized out
+            explanations[p] = nla.verbalize(acts.residuals[p], greedy=True,
+                                            max_new_tokens=max_new_tokens)
+            if verbose and (p % 10 == 0 or p == n - 1):
+                print(f"[gate:L2 gen] pos {p:3d} -> {explanations[p][:60]!r}")
+        nla.unload_av()
+
     for p in range(n):
         rec = log.positions[p]
         activation = acts.residuals[p]
         if end_to_end:
-            # Re-verbalize with the AV (greedy) then score — only for the
-            # summarized region (saves ~24 generations).
             if p < min_position:
                 checks.append(PositionCheck(p, acts.region(p), rec.token, rec.raw_norm,
                                             float(activation.norm()), rec.mse_nrm, None, rec.cos, None))
                 continue
-            expl = nla.verbalize(activation, greedy=True, max_new_tokens=max_new_tokens)
+            expl = explanations[p]
         else:
             expl = rec.explanation_clean
         mse, cos = nla.score(expl, activation)
@@ -171,8 +185,7 @@ def run_gate(
         if not end_to_end:
             dcos.append(abs(cos - rec.cos))
         if verbose and (p % 10 == 0 or p == n - 1):
-            tag = "L2" if end_to_end else "L1"
-            print(f"[gate:{tag}] pos {p:3d} {acts.region(p):6s} "
+            print(f"[gate:{'L2 score' if end_to_end else 'L1'}] pos {p:3d} {acts.region(p):6s} "
                   f"file(mse={rec.mse_nrm:.3f} cos={rec.cos:.3f})  "
                   f"got(mse={mse:.3f} cos={cos:.3f})")
 
