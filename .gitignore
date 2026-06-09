@@ -4,3 +4,9 @@ __pycache__/
 .pytest_cache/
 build/
 dist/
+
+# secrets — never commit (holds NEURONPEDIA_API_KEY etc.)
+.env
+.env.*
+# macOS cruft
+.DS_Store
