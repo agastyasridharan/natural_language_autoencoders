@@ -1,0 +1,54 @@
+# NLA Studio family registry.
+#
+# One entry per released kitft NLA pair. `layer` is the extraction layer
+# index K (the "L<N>" in the checkpoint name) — i.e. the forward HOOK layer
+# used during data-gen. The activation that the AV/AR were trained on is the
+# OUTPUT of decoder block K, which in HF `output_hidden_states` indexing is
+# `hidden_states[K+1]` (index 0 is the embedding output). nla_core asserts
+# `K == sidecar.extraction_layer_index` and `AR.num_hidden_layers == K+1`, so a
+# wrong value here fails loud at load time rather than silently degrading.
+#
+# Confirm the four base/av/ar repo ids and `layer` against the live HF model
+# cards before loading (the cards literally say "Residual stream output of
+# block K"). `d_model` is cross-checked against the AV embedding width and the
+# AR hidden size at load — it is a guard, not the source of truth.
+
+qwen7b:
+  base_model: Qwen/Qwen2.5-7B-Instruct      # 28 decoder blocks
+  av_repo: kitft/nla-qwen2.5-7b-L20-av
+  ar_repo: kitft/nla-qwen2.5-7b-L20-ar
+  layer: 20            # K -> activation = hidden_states[21]
+  d_model: 3584
+  gated: false         # base is ungated; no HF_TOKEN required
+  gemma_patch: false
+  multi_gpu: false
+
+gemma12b:
+  base_model: google/gemma-3-12b-it         # 48 decoder blocks (text tower)
+  av_repo: kitft/nla-gemma3-12b-L32-av
+  ar_repo: kitft/nla-gemma3-12b-L32-ar
+  layer: 32            # K -> activation = hidden_states[33]
+  d_model: 3840
+  gated: true          # gated base + AV/AR; export HF_TOKEN
+  gemma_patch: true    # SGLang gemma3_mm input_embeds bypass required
+  multi_gpu: false
+
+gemma27b:
+  base_model: google/gemma-3-27b-it         # 62 decoder blocks (text tower)
+  av_repo: kitft/nla-gemma3-27b-L41-av
+  ar_repo: kitft/nla-gemma3-27b-L41-ar
+  layer: 41            # K -> activation = hidden_states[42]
+  d_model: 5376
+  gated: true
+  gemma_patch: true
+  multi_gpu: false
+
+llama70b:
+  base_model: meta-llama/Llama-3.3-70B-Instruct   # 80 decoder blocks
+  av_repo: kitft/Llama-3.3-70B-NLA-L53-av
+  ar_repo: kitft/Llama-3.3-70B-NLA-L53-ar
+  layer: 53            # K -> activation = hidden_states[54]
+  d_model: 8192
+  gated: true
+  gemma_patch: false
+  multi_gpu: true      # AV server needs tensor-parallel; base+AR are large too

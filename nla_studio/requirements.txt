@@ -1,0 +1,29 @@
+# NLA Studio — inference only. No training stack (no Miles/Megatron/GRPO).
+#
+# VERSIONS ARE PINNED ON PURPOSE — do not loosen them.
+# sglang 0.5.6 pins transformers==4.57.1 and torch==2.9.1, the combination the
+# released checkpoints and the vendored client were tested against. Newer sglang
+# (0.5.13+) pins transformers 5.x, whose tokenizer splits the injection char (㈎)
+# when it sits inside the prompt (<concept>㈎</concept>), so the single-token
+# injection anchor disappears and load_family dies with
+#   "injection token appears 0× in canonical prompt".
+# transformers==4.57.x (tokenizers 0.22.x) keeps ㈎ a single token in context.
+
+# AV server. Pins transformers==4.57.1 and torch==2.9.1 transitively.
+# input_embeds API + --disable-radix-cache verified on 0.5.6 (vendor/nla_inference.py).
+sglang[all]==0.5.6
+
+# Pinned explicitly to match sglang 0.5.6 and the trained tokenizer behavior.
+transformers==4.57.1
+tokenizers>=0.22,<0.23
+
+safetensors
+huggingface_hub          # snapshot_download for AV/AR checkpoints
+httpx
+orjson
+pyyaml
+numpy
+pyarrow
+fastapi
+uvicorn
+# torch (==2.9.1) is pulled by sglang. pydantic ships with fastapi.

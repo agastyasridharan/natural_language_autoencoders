@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NLA Studio</title>
+<style>
+  :root {
+    --bg:#0f1216; --panel:#171c23; --panel2:#1e242d; --ink:#e6e9ee; --mut:#93a0b0;
+    --line:#2a323d; --accent:#5aa9ff; --good:#49c08a; --warn:#e0a23a; --bad:#e0604a;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+    font:14px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); display:flex;
+    align-items:baseline; gap:14px; }
+  header h1 { font-size:17px; margin:0; letter-spacing:.3px; }
+  header .sub { color:var(--mut); font-size:12px; }
+  main { max-width:1080px; margin:0 auto; padding:18px 20px 60px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:16px; margin-bottom:16px; }
+  .panel h2 { font-size:13px; text-transform:uppercase; letter-spacing:.6px;
+    color:var(--mut); margin:0 0 12px; }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  label.fld { color:var(--mut); font-size:12px; }
+  select, input[type=text], input[type=number], textarea, button {
+    background:var(--panel2); color:var(--ink); border:1px solid var(--line);
+    border-radius:7px; padding:8px 10px; font:inherit; }
+  textarea { width:100%; resize:vertical; min-height:64px; font-family:ui-monospace,Menlo,Consolas,monospace; }
+  button { cursor:pointer; background:#243043; border-color:#33445c; }
+  button:hover:not(:disabled) { background:#2c3b52; }
+  button.primary { background:var(--accent); color:#06121f; border-color:var(--accent); font-weight:600; }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  .status { font-size:12.5px; color:var(--mut); margin-top:8px; min-height:18px; }
+  .status.ok { color:var(--good); } .status.err { color:var(--bad); } .status.warn { color:var(--warn); }
+  .hint { color:var(--mut); font-size:12px; margin:6px 0 0; }
+  .kv { display:flex; gap:18px; flex-wrap:wrap; font-size:12.5px; color:var(--mut); margin-top:8px; }
+  .kv b { color:var(--ink); font-weight:600; }
+  /* token picker */
+  .tokens { display:flex; flex-wrap:wrap; gap:4px; margin-top:10px;
+    max-height:230px; overflow:auto; padding:4px; background:var(--panel2);
+    border:1px solid var(--line); border-radius:8px; }
+  .tok { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px;
+    border:1px solid var(--line); border-radius:6px; padding:3px 6px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; min-width:34px; background:#10151b; }
+  .tok:hover { border-color:var(--accent); }
+  .tok .t { white-space:pre; }
+  .tok .n { font-size:9.5px; color:var(--mut); margin-top:1px; }
+  .tok.early { opacity:.42; }
+  .tok.high { border-color:var(--bad); }
+  .tok.high .n { color:var(--bad); }
+  .tok.sel { outline:2px solid var(--accent); background:#16273b; }
+  .legend { font-size:11px; color:var(--mut); margin-top:6px; display:flex; gap:14px; }
+  .legend span::before { content:"■ "; }
+  .legend .e::before { color:#54616f; } .legend .h::before { color:var(--bad); }
+  .legend .s::before { color:var(--accent); }
+  .out { white-space:pre-wrap; font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:13px; background:var(--panel2); border:1px solid var(--line);
+    border-radius:8px; padding:12px; margin-top:10px; min-height:20px; }
+  .scoregrid { display:flex; gap:24px; align-items:flex-end; margin-top:6px; }
+  .metric { font-size:30px; font-weight:700; }
+  .metric small { display:block; font-size:11px; color:var(--mut); font-weight:400; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px;
+    border:1px solid var(--line); color:var(--mut); }
+  .pill.good { color:var(--good); border-color:#2c5a47; } .pill.bad { color:var(--bad); border-color:#5a2c2c; }
+  .muted { color:var(--mut); } .sep { height:1px; background:var(--line); margin:14px 0; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>NLA&nbsp;Studio</h1>
+  <span class="sub">activation → words (AV) · words → activation (AR) · inference only</span>
+</header>
+
+<main>
+  <!-- 1. Family -->
+  <section class="panel">
+    <h2>1 · Family</h2>
+    <div class="row">
+      <label class="fld">Model family</label>
+      <select id="family"></select>
+      <button id="btnLoad" class="primary">Load</button>
+      <span id="famMeta" class="muted"></span>
+    </div>
+    <div id="loadStatus" class="status">Pick a family and load. The AV (SGLang) server for it must already be running.</div>
+    <div id="famKv" class="kv"></div>
+  </section>
+
+  <!-- 2. Extract -->
+  <section class="panel">
+    <h2>2 · Get vector (base model → hidden_states[K+1])</h2>
+    <textarea id="extractText">The quick brown fox jumps over the lazy dog.</textarea>
+    <div class="row" style="margin-top:8px">
+      <button id="btnExtract">Extract</button>
+      <span id="extractStatus" class="status" style="margin:0"></span>
+    </div>
+    <div id="picker" style="display:none">
+      <p class="hint">Click a token to select its activation vector. Greyed = early position (little left-context); red = high-norm outlier — both decode unreliably even when injection is correct.</p>
+      <div id="tokens" class="tokens"></div>
+      <div class="legend"><span class="e">early (&lt;10)</span><span class="h">high-norm outlier</span><span class="s">selected</span></div>
+      <div id="selKv" class="kv"></div>
+    </div>
+  </section>
+
+  <!-- 3. AV explain -->
+  <section class="panel">
+    <h2>3 · Explain (AV) — vector → text</h2>
+    <div class="row">
+      <button id="btnExplain" disabled>Explain selected vector</button>
+      <label class="fld">temp</label><input id="avTemp" type="number" step="0.1" value="1.0" style="width:64px">
+      <label class="fld">max tokens</label><input id="avMax" type="number" value="200" style="width:80px">
+      <span id="avStatus" class="status" style="margin:0"></span>
+    </div>
+    <div id="avOut" class="out muted">No explanation yet.</div>
+  </section>
+
+  <!-- 4. AR reconstruct / score -->
+  <section class="panel">
+    <h2>4 · Reconstruct (AR) — text → vector — &amp; score</h2>
+    <textarea id="arText" placeholder="AV explanation lands here after step 3, or type any text to reconstruct.">A description of a quick brown fox jumping over a lazy dog.</textarea>
+    <div class="row" style="margin-top:8px">
+      <button id="btnReconstruct">Reconstruct (AR)</button>
+      <button id="btnScore" disabled>Score vs selected vector</button>
+      <span id="arStatus" class="status" style="margin:0"></span>
+    </div>
+    <div id="arKv" class="kv"></div>
+
+    <div class="sep"></div>
+    <h2>Reconstruction fidelity</h2>
+    <div class="scoregrid">
+      <div class="metric" id="mCos">–<small>cosine</small></div>
+      <div class="metric" id="mMse">–<small>MSE</small></div>
+      <div id="mLabel" class="pill">no score yet</div>
+    </div>
+    <p class="hint" id="scoreScale">cos 1.0 / MSE 0.0 perfect · cos 0.9 / MSE 0.2 good · cos 0.0 / MSE 2.0 orthogonal</p>
+  </section>
+
+  <p class="muted" style="font-size:12px">
+    Round-trip a clean position end-to-end with the API: <code>POST /roundtrip {text, token_index}</code>.
+    All-CJK AV output means injection failed — check injection_scale / embed_scale / the Gemma patch.
+  </p>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let state = { family:null, text:null, selVectorId:null, dModel:null };
+
+async function api(path, body) {
+  const r = await fetch(path, {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(body || {}),
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.detail || (r.status + " " + r.statusText));
+  return data;
+}
+function setStatus(el, msg, cls) { el.textContent = msg; el.className = "status" + (cls ? " " + cls : ""); }
+function esc(s) { return s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function showTok(s) { return s === "" ? "∅" : esc(s).replace(/ /g,"␣").replace(/\n/g,"↵").replace(/\t/g,"⇥"); }
+
+// ── family ───────────────────────────────────────────────────────────────────
+async function initFamilies() {
+  try {
+    const d = await fetch("/families").then(r => r.json());
+    $("family").innerHTML = d.families.map(f =>
+      `<option value="${f.name}">${f.name} — ${f.base_model} (L${f.layer}, d=${f.d_model})${f.gated ? " [gated]" : ""}</option>`
+    ).join("");
+    if (d.loaded) {  // a family is already resident (e.g. after a page refresh)
+      const f = d.families.find(x => x.name === d.loaded);
+      $("family").value = d.loaded;
+      state.family = d.loaded; state.dModel = f ? f.d_model : null;
+      setStatus($("loadStatus"), `${d.loaded} already loaded — extract directly, or re-Load to refresh details.`, "ok");
+    }
+  } catch (e) { setStatus($("loadStatus"), "Could not reach backend: " + e.message, "err"); }
+}
+
+$("btnLoad").onclick = async () => {
+  const fam = $("family").value;
+  setStatus($("loadStatus"), `Loading ${fam} (base + AR in-process, verifying AV server)… this can take a minute.`, "");
+  $("btnLoad").disabled = true;
+  try {
+    const d = await api("/load_family", { family: fam });
+    state.family = d.family; state.dModel = d.d_model;
+    state.selVectorId = null; updateButtons();
+    setStatus($("loadStatus"), `Loaded ${d.family}.`, "ok");
+    $("famKv").innerHTML = [
+      ["AV", d.av_repo], ["AR", d.ar_repo], ["layer K", d.layer_k],
+      ["hidden_states idx", d.hidden_state_index], ["d_model", d.d_model],
+      ["injection_scale", d.injection_scale], ["embed_scale", d.embed_scale],
+      ["mse_scale", d.mse_scale], ["AR layers", d.ar_num_hidden_layers],
+      ["inject char", `${d.injection_char} (id ${d.injection_token_id})`],
+      ["SGLang", d.sglang_url],
+    ].map(([k,v]) => `<div><b>${k}</b> ${esc(String(v))}</div>`).join("");
+  } catch (e) {
+    setStatus($("loadStatus"), "Load failed: " + e.message, "err");
+  } finally { $("btnLoad").disabled = false; }
+};
+
+// ── extract / token picker ───────────────────────────────────────────────────
+$("btnExtract").onclick = async () => {
+  if (!state.family) { setStatus($("extractStatus"), "Load a family first.", "err"); return; }
+  state.text = $("extractText").value;
+  setStatus($("extractStatus"), "Running base model…", "");
+  $("btnExtract").disabled = true;
+  try {
+    const d = await api("/extract", { text: state.text });
+    renderTokens(d);
+    setStatus($("extractStatus"), `${d.n_tokens} tokens · pulling hidden_states[${d.hidden_state_index}] (block ${d.layer_k} output).`, "ok");
+    $("picker").style.display = "block";
+    selectToken(d.suggested_index);  // auto-pick a clean default
+  } catch (e) { setStatus($("extractStatus"), "Extract failed: " + e.message, "err"); }
+  finally { $("btnExtract").disabled = false; }
+};
+
+function renderTokens(d) {
+  $("tokens").innerHTML = d.tokens.map(t =>
+    `<div class="tok ${t.early?"early":""} ${t.high_outlier?"high":""}" data-i="${t.index}" title="pos ${t.index} · norm ${t.norm}${t.early?" · early":""}${t.high_outlier?" · outlier":""}">
+       <span class="t">${showTok(t.token)}</span><span class="n">${t.norm}</span>
+     </div>`).join("");
+  [...$("tokens").children].forEach(el =>
+    el.onclick = () => selectToken(parseInt(el.dataset.i, 10)));
+}
+
+async function selectToken(i) {
+  setStatus($("extractStatus"), `Selecting position ${i}…`, "");
+  try {
+    const d = await api("/extract", { text: state.text, token_index: i });
+    const s = d.selected;
+    state.selVectorId = s.id; updateButtons();
+    [...$("tokens").children].forEach(el => el.classList.toggle("sel", parseInt(el.dataset.i,10) === i));
+    const flags = [s.early?"⚠ early position":null, s.high_outlier?"⚠ high-norm outlier":null].filter(Boolean).join(" · ");
+    $("selKv").innerHTML =
+      `<div><b>id</b> ${s.id}</div><div><b>position</b> ${s.index}</div>` +
+      `<div><b>token</b> <code>${showTok(s.token)}</code></div><div><b>L2 norm</b> ${s.norm}</div>` +
+      (flags ? `<div class="status warn" style="margin:0">${flags}</div>` : `<div class="status ok" style="margin:0">clean position</div>`);
+    setStatus($("extractStatus"), `Selected vector ${s.id} at position ${i}.`, "ok");
+  } catch (e) { setStatus($("extractStatus"), "Select failed: " + e.message, "err"); }
+}
+
+// ── AV explain ───────────────────────────────────────────────────────────────
+$("btnExplain").onclick = async () => {
+  if (!state.selVectorId) return;
+  setStatus($("avStatus"), "Generating (AV via SGLang)…", "");
+  $("btnExplain").disabled = true;
+  try {
+    const d = await api("/av_explain", {
+      vector_id: state.selVectorId,
+      temperature: parseFloat($("avTemp").value), max_new_tokens: parseInt($("avMax").value,10),
+    });
+    $("avOut").textContent = d.explanation || "(empty)";
+    $("avOut").className = "out";
+    $("arText").value = d.explanation || $("arText").value;  // feed step 4
+    if (d.looks_like_injection_failure)
+      setStatus($("avStatus"), `⚠ ${(d.cjk_fraction*100).toFixed(0)}% CJK — injection likely FAILED (check injection_scale / embed_scale / Gemma patch).`, "err");
+    else
+      setStatus($("avStatus"), `English output (CJK ${(d.cjk_fraction*100).toFixed(0)}%).`, "ok");
+  } catch (e) { setStatus($("avStatus"), "AV failed: " + e.message, "err"); }
+  finally { $("btnExplain").disabled = false; }
+};
+
+// ── AR reconstruct / score ───────────────────────────────────────────────────
+$("btnReconstruct").onclick = async () => {
+  if (!state.family) { setStatus($("arStatus"), "Load a family first.", "err"); return; }
+  setStatus($("arStatus"), "Reconstructing (AR)…", "");
+  $("btnReconstruct").disabled = true;
+  try {
+    const d = await api("/ar_reconstruct", { text: $("arText").value });
+    $("arKv").innerHTML = `<div><b>predicted vector id</b> ${d.id}</div><div><b>L2 norm</b> ${d.norm}</div><div><b>d_model</b> ${d.d_model}</div>`;
+    setStatus($("arStatus"), `AR predicted vector ${d.id} (norm ${d.norm}). Use 'Score vs selected vector' to compare against the extracted one.`, "ok");
+  } catch (e) { setStatus($("arStatus"), "AR failed: " + e.message, "err"); }
+  finally { $("btnReconstruct").disabled = false; }
+};
+
+$("btnScore").onclick = async () => {
+  if (!state.selVectorId) { setStatus($("arStatus"), "Select an extracted vector (step 2) first.", "err"); return; }
+  setStatus($("arStatus"), "Scoring…", "");
+  $("btnScore").disabled = true;
+  try {
+    const d = await api("/score", { text: $("arText").value, vector_id: state.selVectorId });
+    $("mCos").innerHTML = `${d.cosine}<small>cosine</small>`;
+    $("mMse").innerHTML = `${d.mse}<small>MSE</small>`;
+    const good = d.cosine >= 0.85;
+    $("mLabel").textContent = d.label;
+    $("mLabel").className = "pill " + (good ? "good" : (d.cosine < 0.5 ? "bad" : ""));
+    $("scoreScale").textContent = d.scale;
+    setStatus($("arStatus"), `Scored AR text vs ${d.vector_id}.`, "ok");
+  } catch (e) { setStatus($("arStatus"), "Score failed: " + e.message, "err"); }
+  finally { updateButtons(); }
+};
+
+function updateButtons() {
+  $("btnExplain").disabled = !state.selVectorId;
+  $("btnScore").disabled = !state.selVectorId;
+}
+
+initFamilies();
+</script>
+</body>
+</html>
