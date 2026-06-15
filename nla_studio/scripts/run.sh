@@ -9,10 +9,14 @@
 #
 # Env (forwarded to the app — see app/server.py):
 #   NLA_INPROC_DEVICE   base+AR device      (default cuda:0)
+#   NLA_BASE_DEVICE     base device         (default NLA_INPROC_DEVICE)
+#   NLA_AR_DEVICE       AR device           (default NLA_INPROC_DEVICE)
+#   NLA_EXTRACT_CACHE   cached extractions  (default 8)
 #   NLA_SGLANG_PORT     AV server port      (default 30000)
 #   NLA_PORT            web app port        (default 8000)
 #   NLA_HOST            web app host        (default 0.0.0.0)
 #   HF_TOKEN            for gated families
+#   HF_HUB_ENABLE_HF_TRANSFER=1  faster weight downloads (hf_transfer)
 set -euo pipefail
 
 FAMILY="${1:-}"

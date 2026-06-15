@@ -19,6 +19,7 @@ tokenizers>=0.22,<0.23
 
 safetensors
 huggingface_hub          # snapshot_download for AV/AR checkpoints
+hf_transfer              # Rust-accelerated downloads; set HF_HUB_ENABLE_HF_TRANSFER=1
 httpx
 orjson
 pyyaml

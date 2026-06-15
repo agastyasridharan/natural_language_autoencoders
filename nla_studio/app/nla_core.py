@@ -198,6 +198,8 @@ def load_family(
     registry_path: str | Path,
     *,
     inproc_device: str = "cuda:0",
+    base_device: str | None = None,
+    ar_device: str | None = None,
     sglang_url: str = "http://localhost:30000",
     hf_token: str | None = None,
     dtype: torch.dtype = torch.bfloat16,
@@ -207,10 +209,18 @@ def load_family(
 
     Downloads AV/AR snapshots into the shared HF cache (SGLang reuses the AV
     snapshot, so no double download). The base model loads from the HF cache via
-    from_pretrained. `inproc_device` places the base+AR; multi-GPU families use
-    device_map="auto" for the base (the AR still lands on one device — see README,
-    llama70b needs a sharded AR which is out of scope for this demo).
+    from_pretrained.
+
+    Device placement: `inproc_device` is the default for both the base model and
+    the AR; `base_device`/`ar_device` override each independently (used for the
+    "put the AR on the GPU, keep the base on CPU" speed recipe on a single Colab
+    GPU — see README "Going faster"). Device placement never changes any number:
+    the same weights in the same dtype produce the same activations on CPU or GPU.
+    Multi-GPU families use device_map="auto" for the base (the AR still lands on
+    one device — see README, llama70b needs a sharded AR, out of scope here).
     """
+    base_device = base_device or inproc_device
+    ar_device = ar_device or inproc_device
     from huggingface_hub import snapshot_download  # local import: optional dep path
 
     registry = load_registry(registry_path)
@@ -229,10 +239,10 @@ def load_family(
     av_client = NLAClient(av_path, sglang_url=sglang_url, device="cpu")
 
     # AR critic in-process.
-    critic = NLACritic(ar_path, device=inproc_device, dtype=dtype)
+    critic = NLACritic(ar_path, device=ar_device, dtype=dtype)
 
     # Base model in-process for extraction.
-    base_device_map = "auto" if cfg.get("multi_gpu") else inproc_device
+    base_device_map = "auto" if cfg.get("multi_gpu") else base_device
     base_model = AutoModelForCausalLM.from_pretrained(
         cfg["base_model"], torch_dtype=dtype, device_map=base_device_map,
         trust_remote_code=True, token=hf_token,
@@ -317,19 +327,28 @@ def _outlier_threshold(norms: np.ndarray) -> float:
 
 
 @torch.inference_mode()
-def extract(
+def extract_all(
     fam: LoadedFamily,
     text: str,
-    token_index: int | None = None,
     *,
     max_length: int = 2048,
 ) -> dict[str, Any]:
-    """Run the base model, return per-token L2 norms + previews at hidden_states[K+1].
+    """Run the base model ONCE and return per-token previews **plus** the full
+    [T, d] activation matrix at hidden_states[K+1].
+
+    This is the single expensive call (one base forward). The server caches the
+    result per (family, text); `select()` then slices any token out of it with no
+    extra forward, so clicking around the token grid is free. The vectors are
+    bit-identical to a fresh forward — this is pure memoization, not an
+    approximation.
 
     Tokenization matches data-gen's HFExtractor: raw text, add_special_tokens=True
-    (BOS for Gemma/Llama, no-op for Qwen) — NOT a chat template. If token_index is
-    given, the selected vector is returned under "selected" (the server stores it
-    and hands back an id; raw floats never reach the UI).
+    (BOS for Gemma/Llama, no-op for Qwen) — NOT a chat template.
+
+    Private (leading-underscore) keys stay server-side and are never serialized:
+      _vectors  float32 [T, d] — the activation matrix select() slices.
+      _norms    float32 [T]    — full-precision L2 norms (select() reports these).
+      _hi_thr   float          — outlier cutoff (select() recomputes high_outlier).
     """
     enc = fam.base_tokenizer(
         text, return_tensors="pt", add_special_tokens=True,
@@ -377,30 +396,70 @@ def extract(
     clean = [t["index"] for t in tokens if not t["early"] and not t["high_outlier"]]
     suggested = clean[len(clean) // 2] if clean else min(EARLY_POSITION_WARN, seq_len - 1)
 
-    result: dict[str, Any] = {
+    return {
         "n_tokens": seq_len,
         "tokens": tokens,
         "suggested_index": suggested,
         "hidden_state_index": fam.hidden_state_index,
         "layer_k": fam.layer_k,
-        "selected": None,
+        "_vectors": np.ascontiguousarray(layer_hs.numpy(), dtype=np.float32),  # [T, d]
+        "_norms": norms.astype(np.float32),                                    # [T]
+        "_hi_thr": hi_thr,
     }
 
+
+def picker_view(res: dict[str, Any]) -> dict[str, Any]:
+    """JSON-safe picker fields from an extract_all() result (drops the server-only
+    [T, d] matrix / norms / threshold). `selected` is filled in by the caller."""
+    out = {k: v for k, v in res.items() if not k.startswith("_")}
+    out["selected"] = None
+    return out
+
+
+def select(res: dict[str, Any], token_index: int) -> dict[str, Any]:
+    """Slice one token's vector out of a cached extract_all() result. No forward.
+
+    Returns the same `selected` payload the old per-call extract() did, byte for
+    byte (full-precision norm, recomputed high_outlier) — the only difference is
+    that the heavy forward already happened once and is reused here.
+    """
+    seq_len = res["n_tokens"]
+    if not (0 <= token_index < seq_len):
+        raise IndexError(
+            f"token_index {token_index} out of range [0,{seq_len}) for this text."
+        )
+    norm = float(res["_norms"][token_index])
+    return {
+        # copy (not a view) so the stored vector doesn't pin the whole [T,d]
+        # matrix alive after the cache entry is evicted.
+        "vector": np.array(res["_vectors"][token_index], dtype=np.float32, copy=True),
+        "index": token_index,
+        "token": res["tokens"][token_index]["token"],
+        "norm": norm,
+        "early": token_index < EARLY_POSITION_WARN,
+        "high_outlier": norm > res["_hi_thr"],
+    }
+
+
+@torch.inference_mode()
+def extract(
+    fam: LoadedFamily,
+    text: str,
+    token_index: int | None = None,
+    *,
+    max_length: int = 2048,
+) -> dict[str, Any]:
+    """Back-compat one-shot extraction: run the forward, then optionally select.
+
+    Prefer the cached extract_all()+select() path in the server — this recomputes
+    the base forward on every call. Kept for smoke.py and standalone use; the
+    return shape is unchanged.
+    """
+    res = extract_all(fam, text, max_length=max_length)
+    out = picker_view(res)
     if token_index is not None:
-        if not (0 <= token_index < seq_len):
-            raise IndexError(
-                f"token_index {token_index} out of range [0,{seq_len}) for this text."
-            )
-        vec = layer_hs[token_index].contiguous().numpy().astype(np.float32)
-        result["selected"] = {
-            "vector": vec,                       # server stores; never serialized to UI
-            "index": token_index,
-            "token": tokens[token_index]["token"],
-            "norm": float(norms[token_index]),
-            "early": token_index < EARLY_POSITION_WARN,
-            "high_outlier": float(norms[token_index]) > hi_thr,
-        }
-    return result
+        out["selected"] = select(res, token_index)
+    return out
 
 
 # ── thin pass-throughs to the vendored AV/AR ─────────────────────────────────

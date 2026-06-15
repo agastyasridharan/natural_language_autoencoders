@@ -100,6 +100,39 @@ SGLang** (which grabs `--mem-fraction-static` of its GPU, default 0.85).
 
 One family is resident at a time. Loading a new family frees the previous one.
 
+## Performance
+
+The AV (SGLang/GPU) is fast; the cost is the in-process **base / AR forwards**,
+which are slow when those models sit on CPU (the single-GPU Colab default). Three
+speed-ups are built in, and **none of them changes a single output number** —
+they are memoization and device placement, not approximations.
+
+1. **Extraction is cached per `(family, text)`.** The base forward is
+   deterministic, so `/extract` runs it once per text and caches the full
+   `[T, d]` activation matrix; selecting any token (and re-clicking tokens) just
+   slices that matrix — no second forward. This is the big interactive win: the
+   token grid becomes free to explore after the first extract. Bounded LRU
+   (`NLA_EXTRACT_CACHE`, default 8 texts); cleared on every `/load_family`. The
+   cached vectors are bit-identical to a fresh forward (`extract_all` → `select`).
+
+2. **Faster downloads.** `pip install` pulls `hf_transfer`; set
+   `HF_HUB_ENABLE_HF_TRANSFER=1` to accelerate the ~41 GB of first-run weight
+   downloads (the Colab notebook sets it automatically).
+
+3. **Independent device placement.** `NLA_BASE_DEVICE` and `NLA_AR_DEVICE`
+   override `NLA_INPROC_DEVICE` per model. On a 40 GB A100 you can fit the AV
+   plus **one** of base/AR on the GPU: lower `NLA_MEM_FRACTION` to ~0.55, then
+   put the AR on the GPU (`NLA_AR_DEVICE=cuda:0`) for fast `Score`/`Reconstruct`,
+   or the base on the GPU (`NLA_BASE_DEVICE=cuda:0`) for fast first-extracts.
+   Same weights, same dtype → same vectors on CPU or GPU.
+
+```bash
+# A100 40 GB: AV + AR on GPU, base on CPU (its forward is cached per text).
+NLA_MEM_FRACTION=0.55 CUDA_VISIBLE_DEVICES=0 scripts/launch_sglang.sh qwen7b
+NLA_BASE_DEVICE=cpu NLA_AR_DEVICE=cuda:0 NLA_SGLANG_URL=http://localhost:30000 \
+    scripts/run.sh qwen7b
+```
+
 ## Quick start — qwen7b (the reference path)
 
 qwen is ungated, so no `HF_TOKEN` is needed. Pick GPUs to taste.

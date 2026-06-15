@@ -14,6 +14,8 @@ Run:
     NLA_REGISTRY        path to families.yaml   (default: app/families.yaml)
     NLA_SGLANG_URL      AV server root          (default: http://localhost:30000)
     NLA_INPROC_DEVICE   base+AR device          (default: cuda:0)
+    NLA_BASE_DEVICE     base-model device       (default: NLA_INPROC_DEVICE)
+    NLA_AR_DEVICE       AR device               (default: NLA_INPROC_DEVICE)
     NLA_VERIFY_SGLANG   "0" to skip the reachability check on load (default: "1")
     HF_TOKEN            for gated Gemma/Llama repos
 """
@@ -23,6 +25,7 @@ from __future__ import annotations
 import itertools
 import os
 import threading
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any
 
@@ -39,8 +42,16 @@ _WEB = _ROOT / "web"
 REGISTRY_PATH = os.environ.get("NLA_REGISTRY", str(Path(__file__).parent / "families.yaml"))
 SGLANG_URL = os.environ.get("NLA_SGLANG_URL", "http://localhost:30000")
 INPROC_DEVICE = os.environ.get("NLA_INPROC_DEVICE", "cuda:0")
+BASE_DEVICE = os.environ.get("NLA_BASE_DEVICE") or INPROC_DEVICE
+AR_DEVICE = os.environ.get("NLA_AR_DEVICE") or INPROC_DEVICE
 VERIFY_SGLANG = os.environ.get("NLA_VERIFY_SGLANG", "1") != "0"
 HF_TOKEN = os.environ.get("HF_TOKEN")
+
+# How many (family, text) extractions to keep hot. Each base forward is the
+# studio's most expensive op, and the activations are deterministic, so we run it
+# once per text and slice every token from the cached [T, d] matrix — token
+# clicks become free. Bounded LRU so long sessions don't grow without limit.
+_EXTRACT_CACHE_MAX = int(os.environ.get("NLA_EXTRACT_CACHE", "8"))
 
 app = FastAPI(title="NLA Studio", version="1.0")
 
@@ -54,11 +65,33 @@ _FAMILY: nla_core.LoadedFamily | None = None
 _VECTORS: dict[str, dict[str, Any]] = {}
 _ID_SEQ = itertools.count(1)
 
+# LRU of extract_all() results keyed by (family_name, text). Holds the [T, d]
+# matrix server-side; cleared whenever a family is (re)loaded. Access is always
+# under _LOCK (same as every other model op), so a plain OrderedDict is safe.
+_EXTRACT_CACHE: "OrderedDict[tuple[str, str], dict[str, Any]]" = OrderedDict()
+
 
 def _require_family() -> nla_core.LoadedFamily:
     if _FAMILY is None:
         raise HTTPException(409, "No family loaded. POST /load_family first.")
     return _FAMILY
+
+
+def _extract_cached(fam: nla_core.LoadedFamily, text: str) -> dict[str, Any]:
+    """extract_all() memoized per (family, text). Runs the base forward at most
+    once per text; later token selections slice the cached matrix. Call under
+    _LOCK. The returned dict is the live cache entry — read it, don't mutate it."""
+    key = (fam.name, text)
+    hit = _EXTRACT_CACHE.get(key)
+    if hit is not None:
+        _EXTRACT_CACHE.move_to_end(key)
+        return hit
+    res = nla_core.extract_all(fam, text)
+    _EXTRACT_CACHE[key] = res
+    _EXTRACT_CACHE.move_to_end(key)
+    while len(_EXTRACT_CACHE) > _EXTRACT_CACHE_MAX:
+        _EXTRACT_CACHE.popitem(last=False)
+    return res
 
 
 def _store_vector(vec: np.ndarray, meta: dict[str, Any]) -> str:
@@ -170,6 +203,7 @@ def load_family(req: LoadFamilyReq) -> dict[str, Any]:
         if _FAMILY is not None:
             _FAMILY = None
             _VECTORS.clear()
+            _EXTRACT_CACHE.clear()
             try:
                 import torch
                 if torch.cuda.is_available():
@@ -179,8 +213,8 @@ def load_family(req: LoadFamilyReq) -> dict[str, Any]:
         try:
             fam = nla_core.load_family(
                 req.family, REGISTRY_PATH,
-                inproc_device=INPROC_DEVICE, sglang_url=SGLANG_URL,
-                hf_token=HF_TOKEN, verify_sglang=VERIFY_SGLANG,
+                inproc_device=INPROC_DEVICE, base_device=BASE_DEVICE, ar_device=AR_DEVICE,
+                sglang_url=SGLANG_URL, hf_token=HF_TOKEN, verify_sglang=VERIFY_SGLANG,
             )
         except Exception as exc:  # noqa: BLE001 — return the actionable message to the UI
             raise HTTPException(400, f"load_family({req.family}) failed: {exc}") from exc
@@ -192,27 +226,22 @@ def load_family(req: LoadFamilyReq) -> dict[str, Any]:
 def extract(req: ExtractReq) -> dict[str, Any]:
     fam = _require_family()
     with _LOCK:
-        try:
-            res = nla_core.extract(fam, req.text, req.token_index)
-        except IndexError as exc:
-            raise HTTPException(422, str(exc)) from exc
-    selected = res.pop("selected")
-    out: dict[str, Any] = {
-        "n_tokens": res["n_tokens"],
-        "tokens": res["tokens"],
-        "suggested_index": res["suggested_index"],
-        "hidden_state_index": res["hidden_state_index"],
-        "layer_k": res["layer_k"],
-        "selected": None,
-    }
-    if selected is not None:
-        vec = selected.pop("vector")           # strip raw floats before responding
-        vid = _store_vector(vec, {
-            "kind": "extracted", "family": fam.name,
-            "source_text": req.text[:500], "token_index": selected["index"],
-            "token": selected["token"], "norm": round(selected["norm"], 3),
-        })
-        out["selected"] = {"id": vid, **selected, "norm": round(selected["norm"], 3)}
+        # One base forward per (family, text); token selection just slices the
+        # cached matrix, so re-clicking tokens never re-runs the model.
+        res = _extract_cached(fam, req.text)
+        out = nla_core.picker_view(res)
+        if req.token_index is not None:
+            try:
+                selected = nla_core.select(res, req.token_index)
+            except IndexError as exc:
+                raise HTTPException(422, str(exc)) from exc
+            vec = selected.pop("vector")           # strip raw floats before responding
+            vid = _store_vector(vec, {
+                "kind": "extracted", "family": fam.name,
+                "source_text": req.text[:500], "token_index": selected["index"],
+                "token": selected["token"], "norm": round(selected["norm"], 3),
+            })
+            out["selected"] = {"id": vid, **selected, "norm": round(selected["norm"], 3)}
     return out
 
 
@@ -256,13 +285,11 @@ def roundtrip(req: RoundtripReq) -> dict[str, Any]:
     """extract -> av_explain -> score, in one call."""
     fam = _require_family()
     with _LOCK:
+        res = _extract_cached(fam, req.text)
         try:
-            ext = nla_core.extract(fam, req.text, req.token_index)
+            selected = nla_core.select(res, req.token_index)
         except IndexError as exc:
             raise HTTPException(422, str(exc)) from exc
-        selected = ext["selected"]
-        if selected is None:
-            raise HTTPException(422, "roundtrip needs a valid token_index.")
         vec = selected["vector"]
         vid = _store_vector(np.asarray(vec, dtype=np.float32), {
             "kind": "extracted", "family": fam.name,
@@ -282,7 +309,7 @@ def roundtrip(req: RoundtripReq) -> dict[str, Any]:
         "explanation": av["explanation"],
         "cjk_fraction": av["cjk_fraction"],
         "looks_like_injection_failure": av["looks_like_injection_failure"],
-        "n_tokens": ext["n_tokens"],
+        "n_tokens": res["n_tokens"],
         **_interpret(cos, mse),
     }
 
