@@ -4,79 +4,107 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>NLA Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:#0f1216; --panel:#171c23; --panel2:#1e242d; --ink:#e6e9ee; --mut:#93a0b0;
-    --line:#2a323d; --accent:#5aa9ff; --good:#49c08a; --warn:#e0a23a; --bad:#e0604a;
+  :root{
+    --bg:#faf6f1; --panel:#fffdf9; --panel2:#f5f0e8; --ink:#2c2416; --ink2:#1a1408;
+    --mut:#6b5d4d; --line:#e8e0d4; --line2:#ddd5c8;
+    --green:#4a7c59; --green-d:#3d6648; --amber:#b45309; --red:#a65d57; --red-d:#8b4d48;
   }
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink);
-    font:14px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
-  header { padding:14px 20px; border-bottom:1px solid var(--line); display:flex;
-    align-items:baseline; gap:14px; }
-  header h1 { font-size:17px; margin:0; letter-spacing:.3px; }
-  header .sub { color:var(--mut); font-size:12px; }
-  main { max-width:1080px; margin:0 auto; padding:18px 20px 60px; }
-  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px;
-    padding:16px; margin-bottom:16px; }
-  .panel h2 { font-size:13px; text-transform:uppercase; letter-spacing:.6px;
-    color:var(--mut); margin:0 0 12px; }
-  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-  label.fld { color:var(--mut); font-size:12px; }
-  select, input[type=text], input[type=number], textarea, button {
-    background:var(--panel2); color:var(--ink); border:1px solid var(--line);
-    border-radius:7px; padding:8px 10px; font:inherit; }
-  textarea { width:100%; resize:vertical; min-height:64px; font-family:ui-monospace,Menlo,Consolas,monospace; }
-  button { cursor:pointer; background:#243043; border-color:#33445c; }
-  button:hover:not(:disabled) { background:#2c3b52; }
-  button.primary { background:var(--accent); color:#06121f; border-color:var(--accent); font-weight:600; }
-  button:disabled { opacity:.45; cursor:not-allowed; }
-  .status { font-size:12.5px; color:var(--mut); margin-top:8px; min-height:18px; }
-  .status.ok { color:var(--good); } .status.err { color:var(--bad); } .status.warn { color:var(--warn); }
-  .hint { color:var(--mut); font-size:12px; margin:6px 0 0; }
-  .kv { display:flex; gap:18px; flex-wrap:wrap; font-size:12.5px; color:var(--mut); margin-top:8px; }
-  .kv b { color:var(--ink); font-weight:600; }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); padding:22px 28px;
+    font-family:'EB Garamond',Georgia,'Times New Roman',serif; font-size:15px; line-height:1.5;}
+  .container{max-width:1280px; margin:0 auto;}
+  header{margin-bottom:18px;}
+  header h1{font-size:1.7rem; font-weight:500; letter-spacing:-0.02em; color:var(--ink2); margin:0 0 2px;}
+  header .sub{color:var(--mut); font-style:italic; font-size:0.95rem;}
+
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:16px;
+    box-shadow:0 2px 6px rgba(44,36,22,.05); margin-bottom:16px;}
+  .panel h2{font-size:1.1rem; font-weight:600; color:var(--ink); margin:0 0 12px;
+    display:flex; align-items:baseline; gap:8px;}
+  .panel h2 .num{color:var(--green); font-weight:600;}
+  .panel h2 .sub2{color:var(--mut); font-weight:400; font-style:italic; font-size:0.85rem;}
+
+  .main-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start;}
+  .main-grid > div{display:flex; flex-direction:column; gap:16px;}
+  .main-grid .panel{margin-bottom:0;}
+  @media (max-width:880px){ .main-grid{grid-template-columns:1fr;} }
+
+  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  label.fld{color:var(--mut); font-size:0.85rem;}
+  select,input[type=text],input[type=number],textarea{
+    background:#fffefb; color:var(--ink); border:1px solid var(--line2); border-radius:4px;
+    padding:7px 9px; font-family:inherit; font-size:0.95rem;}
+  select:focus,input:focus,textarea:focus{outline:none; border-color:var(--green);}
+  textarea{width:100%; resize:vertical; min-height:72px;
+    font-family:ui-monospace,Menlo,Consolas,monospace; font-size:0.82rem; line-height:1.5;}
+
+  button{cursor:pointer; padding:6px 14px; border:1px solid var(--line2); border-radius:4px;
+    background:var(--panel); color:var(--ink); font-family:inherit; font-size:0.9rem; font-weight:500;
+    transition:all .2s;}
+  button:hover:not(:disabled){background:var(--panel2); border-color:#a89880;}
+  button.primary{background:var(--green); color:#fff; border-color:var(--green-d);}
+  button.primary:hover:not(:disabled){background:var(--green-d);}
+  button:disabled{opacity:.42; cursor:not-allowed;}
+
+  .status{font-size:0.85rem; color:var(--mut); margin-top:8px; min-height:18px;}
+  .status.ok{color:var(--green);} .status.err{color:var(--red);} .status.warn{color:var(--amber);}
+  .hint{color:var(--mut); font-size:0.85rem; margin:6px 0 0; font-style:italic;}
+  .kv{display:flex; gap:16px; flex-wrap:wrap; font-size:0.85rem; color:var(--mut); margin-top:10px;}
+  .kv b{color:var(--ink); font-weight:600;}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:0.82em;
+    background:var(--panel2); padding:1px 5px; border-radius:3px;}
+
   /* token picker */
-  .tokens { display:flex; flex-wrap:wrap; gap:4px; margin-top:10px;
-    max-height:230px; overflow:auto; padding:4px; background:var(--panel2);
-    border:1px solid var(--line); border-radius:8px; }
-  .tok { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px;
-    border:1px solid var(--line); border-radius:6px; padding:3px 6px; cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; min-width:34px; background:#10151b; }
-  .tok:hover { border-color:var(--accent); }
-  .tok .t { white-space:pre; }
-  .tok .n { font-size:9.5px; color:var(--mut); margin-top:1px; }
-  .tok.early { opacity:.42; }
-  .tok.high { border-color:var(--bad); }
-  .tok.high .n { color:var(--bad); }
-  .tok.sel { outline:2px solid var(--accent); background:#16273b; }
-  .legend { font-size:11px; color:var(--mut); margin-top:6px; display:flex; gap:14px; }
-  .legend span::before { content:"■ "; }
-  .legend .e::before { color:#54616f; } .legend .h::before { color:var(--bad); }
-  .legend .s::before { color:var(--accent); }
-  .out { white-space:pre-wrap; font-family:ui-monospace,Menlo,Consolas,monospace;
-    font-size:13px; background:var(--panel2); border:1px solid var(--line);
-    border-radius:8px; padding:12px; margin-top:10px; min-height:20px; }
-  .scoregrid { display:flex; gap:24px; align-items:flex-end; margin-top:6px; }
-  .metric { font-size:30px; font-weight:700; }
-  .metric small { display:block; font-size:11px; color:var(--mut); font-weight:400; }
-  .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px;
-    border:1px solid var(--line); color:var(--mut); }
-  .pill.good { color:var(--good); border-color:#2c5a47; } .pill.bad { color:var(--bad); border-color:#5a2c2c; }
-  .muted { color:var(--mut); } .sep { height:1px; background:var(--line); margin:14px 0; }
-  a { color:var(--accent); }
+  .tokens{display:flex; flex-wrap:wrap; gap:5px; margin-top:10px; max-height:240px; overflow:auto;
+    padding:6px; background:var(--bg); border:1px solid var(--line); border-radius:6px;}
+  .tok{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:0.72rem; background:var(--panel);
+    border:1px solid var(--line2); border-radius:5px; padding:3px 6px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; min-width:34px; transition:all .12s;}
+  .tok:hover{border-color:var(--green);}
+  .tok .t{white-space:pre; color:var(--ink);}
+  .tok .n{font-size:0.62rem; color:var(--mut); margin-top:1px; font-variant-numeric:tabular-nums;}
+  .tok.early{opacity:.4;}
+  .tok.high{border-color:var(--red);}
+  .tok.high .n{color:var(--red);}
+  .tok.sel{outline:2px solid var(--green); background:#eef3ec;}
+  .legend{font-size:0.78rem; color:var(--mut); margin-top:8px; display:flex; gap:14px; flex-wrap:wrap;}
+  .legend span::before{content:"\25A0  ";}
+  .legend .e::before{color:#bdb09c;} .legend .h::before{color:var(--red);} .legend .s::before{color:var(--green);}
+
+  /* AV explanation reads as prose, so serif like the rest of the page */
+  .out{white-space:pre-wrap; font-family:inherit; font-size:0.98rem; line-height:1.6;
+    background:var(--panel2); border:1px solid var(--line); border-radius:6px; padding:13px 15px;
+    margin-top:10px; min-height:22px;}
+  .out.muted{color:var(--mut); font-style:italic;}
+
+  .scoregrid{display:flex; gap:30px; align-items:flex-end; margin-top:4px; flex-wrap:wrap;}
+  .metric{font-size:2.1rem; font-weight:600; color:var(--ink2); line-height:1; font-variant-numeric:tabular-nums;}
+  .metric small{display:block; font-size:0.7rem; color:var(--mut); font-weight:400; font-style:italic;
+    font-variant-numeric:normal; margin-top:4px;}
+  .pill{display:inline-block; padding:3px 11px; border-radius:999px; font-size:0.8rem;
+    border:1px solid var(--line2); color:var(--mut); background:var(--panel2);}
+  .pill.good{color:#fff; background:var(--green); border-color:var(--green-d);}
+  .pill.bad{color:#fff; background:var(--red); border-color:var(--red-d);}
+
+  .muted{color:var(--mut);}
+  .sep{height:1px; background:var(--line); margin:16px 0;}
+  a{color:var(--green);}
 </style>
 </head>
 <body>
-<header>
-  <h1>NLA&nbsp;Studio</h1>
-  <span class="sub">activation → words (AV) · words → activation (AR) · inference only</span>
-</header>
+<div class="container">
+  <header>
+    <h1>NLA Studio</h1>
+    <div class="sub">activation &#8594; words (AV) &middot; words &#8594; activation (AR) &middot; inference only</div>
+  </header>
 
-<main>
-  <!-- 1. Family -->
+  <!-- Family (full width) -->
   <section class="panel">
-    <h2>1 · Family</h2>
+    <h2><span class="num">1</span> Family</h2>
     <div class="row">
       <label class="fld">Model family</label>
       <select id="family"></select>
@@ -87,60 +115,65 @@
     <div id="famKv" class="kv"></div>
   </section>
 
-  <!-- 2. Extract -->
-  <section class="panel">
-    <h2>2 · Get vector (base model → hidden_states[K+1])</h2>
-    <textarea id="extractText">The quick brown fox jumps over the lazy dog.</textarea>
-    <div class="row" style="margin-top:8px">
-      <button id="btnExtract">Extract</button>
-      <span id="extractStatus" class="status" style="margin:0"></span>
+  <div class="main-grid">
+    <!-- Left column: extraction -->
+    <div>
+      <section class="panel">
+        <h2><span class="num">2</span> Get vector <span class="sub2">base model &#8594; hidden_states[K+1]</span></h2>
+        <textarea id="extractText">The quick brown fox jumps over the lazy dog.</textarea>
+        <div class="row" style="margin-top:8px">
+          <button id="btnExtract" class="primary">Extract</button>
+          <span id="extractStatus" class="status" style="margin:0"></span>
+        </div>
+        <div id="picker" style="display:none">
+          <p class="hint">Click a token to select its activation vector. Greyed = early position (little left-context); red = high-norm outlier. Both decode unreliably even when injection is correct.</p>
+          <div id="tokens" class="tokens"></div>
+          <div class="legend"><span class="e">early (&lt;10)</span><span class="h">high-norm outlier</span><span class="s">selected</span></div>
+          <div id="selKv" class="kv"></div>
+        </div>
+      </section>
     </div>
-    <div id="picker" style="display:none">
-      <p class="hint">Click a token to select its activation vector. Greyed = early position (little left-context); red = high-norm outlier — both decode unreliably even when injection is correct.</p>
-      <div id="tokens" class="tokens"></div>
-      <div class="legend"><span class="e">early (&lt;10)</span><span class="h">high-norm outlier</span><span class="s">selected</span></div>
-      <div id="selKv" class="kv"></div>
-    </div>
-  </section>
 
-  <!-- 3. AV explain -->
-  <section class="panel">
-    <h2>3 · Explain (AV) — vector → text</h2>
-    <div class="row">
-      <button id="btnExplain" disabled>Explain selected vector</button>
-      <label class="fld">temp</label><input id="avTemp" type="number" step="0.1" value="1.0" style="width:64px">
-      <label class="fld">max tokens</label><input id="avMax" type="number" value="200" style="width:80px">
-      <span id="avStatus" class="status" style="margin:0"></span>
-    </div>
-    <div id="avOut" class="out muted">No explanation yet.</div>
-  </section>
+    <!-- Right column: interpretation -->
+    <div>
+      <section class="panel">
+        <h2><span class="num">3</span> Explain (AV) <span class="sub2">vector &#8594; text</span></h2>
+        <div class="row">
+          <button id="btnExplain" class="primary" disabled>Explain selected vector</button>
+          <label class="fld">temp</label><input id="avTemp" type="number" step="0.1" value="1.0" style="width:62px">
+          <label class="fld">max tokens</label><input id="avMax" type="number" value="200" style="width:78px">
+          <span id="avStatus" class="status" style="margin:0"></span>
+        </div>
+        <div id="avOut" class="out muted">No explanation yet.</div>
+      </section>
 
-  <!-- 4. AR reconstruct / score -->
-  <section class="panel">
-    <h2>4 · Reconstruct (AR) — text → vector — &amp; score</h2>
-    <textarea id="arText" placeholder="AV explanation lands here after step 3, or type any text to reconstruct.">A description of a quick brown fox jumping over a lazy dog.</textarea>
-    <div class="row" style="margin-top:8px">
-      <button id="btnReconstruct">Reconstruct (AR)</button>
-      <button id="btnScore" disabled>Score vs selected vector</button>
-      <span id="arStatus" class="status" style="margin:0"></span>
-    </div>
-    <div id="arKv" class="kv"></div>
+      <section class="panel">
+        <h2><span class="num">4</span> Reconstruct (AR) &amp; score <span class="sub2">text &#8594; vector</span></h2>
+        <textarea id="arText" placeholder="AV explanation lands here after step 3, or type any text to reconstruct.">A description of a quick brown fox jumping over a lazy dog.</textarea>
+        <div class="row" style="margin-top:8px">
+          <button id="btnReconstruct">Reconstruct (AR)</button>
+          <button id="btnScore" class="primary" disabled>Score vs selected vector</button>
+          <span id="arStatus" class="status" style="margin:0"></span>
+        </div>
+        <div id="arKv" class="kv"></div>
 
-    <div class="sep"></div>
-    <h2>Reconstruction fidelity</h2>
-    <div class="scoregrid">
-      <div class="metric" id="mCos">–<small>cosine</small></div>
-      <div class="metric" id="mMse">–<small>MSE</small></div>
-      <div id="mLabel" class="pill">no score yet</div>
+        <div class="sep"></div>
+        <h4 class="muted" style="margin:0 0 8px; font-weight:600; color:var(--mut)">Reconstruction fidelity</h4>
+        <div class="scoregrid">
+          <div class="metric" id="mCos">&ndash;<small>cosine</small></div>
+          <div class="metric" id="mMse">&ndash;<small>MSE</small></div>
+          <div id="mLabel" class="pill">no score yet</div>
+        </div>
+        <p class="hint" id="scoreScale">cos 1.0 / MSE 0.0 perfect &middot; cos 0.9 / MSE 0.2 good &middot; cos 0.0 / MSE 2.0 orthogonal</p>
+      </section>
     </div>
-    <p class="hint" id="scoreScale">cos 1.0 / MSE 0.0 perfect · cos 0.9 / MSE 0.2 good · cos 0.0 / MSE 2.0 orthogonal</p>
-  </section>
+  </div>
 
-  <p class="muted" style="font-size:12px">
+  <p class="muted" style="font-size:0.85rem; margin-top:16px; font-style:italic">
     Round-trip a clean position end-to-end with the API: <code>POST /roundtrip {text, token_index}</code>.
-    All-CJK AV output means injection failed — check injection_scale / embed_scale / the Gemma patch.
+    All-CJK AV output means injection failed: check injection_scale / embed_scale / the Gemma patch.
   </p>
-</main>
+</div>
 
 <script>
 const $ = (id) => document.getElementById(id);
