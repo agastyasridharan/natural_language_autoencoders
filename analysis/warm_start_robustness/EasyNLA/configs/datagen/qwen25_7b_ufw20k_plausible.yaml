@@ -1,0 +1,55 @@
+model: qwen7b
+base_model: Qwen/Qwen2.5-7B-Instruct
+layer_index: 20
+input_dir: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/base_data
+output_dir: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/conditions/plausible
+
+stage2:
+  provider_cls: nla.datagen.providers.OpenAIBatchProvider
+  provider_kwargs:
+    model: gpt-5-mini
+    max_tokens: 600
+    reasoning_effort: minimal
+    verbosity: low
+    api_key_env: OPENAI_API_KEY_2
+    # A terminal Batch may contain billable successful requests even when its
+    # overall status is failed/expired/cancelled. Automatic resubmission is
+    # therefore disabled: the original pessimistic reservation remains charged
+    # until partial usage is manually reconciled, so partial work cannot evade
+    # the global project cap.
+    terminal_batch_retries: 0
+    cache_dir: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/api_cache
+    # Shared with the implausible teacher cache. Recorded project spend before
+    # this run is $42.31016656, of which about $42.2396 is present in this Batch
+    # cache and $0.07056656 came from external QC/smoke calls. Capping the cache
+    # at $87.23 limits new plausible-teacher spend to < $45, makes total project
+    # spend <= ~$87.30, and reserves >$12 for downstream claim adjudication.
+    # The prior-spend floor prevents a missing cache from making the guard
+    # silently undercount.
+    spend_cap_usd: 87.23
+    project_spend_cap_usd: 100.0
+    known_external_spend_usd: 0.07056656
+    reserved_downstream_spend_usd: 12.0
+    minimum_prior_cache_spend_usd: 42.2395
+    # Current official GPT-5 mini Batch API prices, checked 2026-08-28.
+    batch_input_per_million_usd: 0.25
+    batch_cached_input_per_million_usd: 0.025
+    batch_output_per_million_usd: 2.0
+  instruction_template_path: configs/prompts/warmstart_plausible.txt
+  # Smaller than the implausible run solely for budget-guard granularity. The
+  # provider reserves a true byte-level input upper bound plus all 600 possible
+  # output tokens. If a late 2k reservation cannot fit, the matched generator
+  # recursively splits that never-submitted batch until the cap can be enforced
+  # at finer granularity (or one prompt itself cannot fit, which fails closed).
+  chunk_size: 2000
+  # The matched generator retries only rows whose output cannot be parsed.
+  # Each retry uses an attempt-specific formatting reminder, so the
+  # content-addressed Batch cache never replays the same malformed response.
+  format_retry_rounds: 3
+  reference_dir: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/conditions/implausible/splits
+stage3:
+  keep_debug_metadata: true
+shuffle:
+  enabled: true
+  seed: 42
+storage_cls: nla.datagen.storage.LocalStorage

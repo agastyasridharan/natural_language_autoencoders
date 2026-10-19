@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-10T21:38:13Z",
+  "protocol_sha256": "20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637",
+  "text_model_correction_amendment_sha256": "fcd5d50f6f863337d9e9009b1129354afad1ce6dbff17b0510132d0b5d423966",
+  "toolemu_noncyber_scope_amendment_sha256": "655e8d38f2a2e1c51167e12c56baf30fa0c2193e9f2663c73bd113b2c39c5b19",
+  "toolemu_bounded_simulator_amendment_sha256": "407c80a5b9c275599db7018f14146d28d9de987d34fae2b7636d60d1ef7cb426",
+  "toolemu_format_budget_amendment_sha256": "867231016e6cf08c46ea1f0295bef9b6f4fdc2888deac1748cf3b4d02c0cd71f",
+  "toolemu_shared_state_amendment_sha256": "5ab8d198167c16618b543883dcfa2d9888d06b8809347ed855faefc5a752326a",
+  "toolemu_pilot_gate_resolution_sha256": "89df1e504b9ffbfcb1d219ca55bb89d984d70d0456d01b8207287ce71fc4fb59",
+  "status": "frozen_after_clean_pilot_and_before_any_full_batch_outcome",
+  "problem": "The runner's generic exception branch labeled every non-infrastructure exception as a completed task failure. This was broader than preregistration.yaml:quality_and_exclusions and could convert an implementation, parser, or serialization defect into deterministic replacement attrition.",
+  "correction": {
+    "replaceable_task_outcomes": [
+      {
+        "failure_kind": "no_eligible_assistant_token_after_minimum_context_rule",
+        "exact_error": "ValueError: ToolEmu trajectory has no eligible assistant-language token"
+      },
+      {
+        "failure_kind": "nonfinite_activation",
+        "exact_error": "ValueError: captured activation contains nonfinite values"
+      },
+      {
+        "failure_kind": "bounded_budget_exceeded",
+        "exception_type": "ToolEmuBudgetExceeded",
+        "authority": "toolemu_format_budget_amendment.json:correction.budget_failure_rule"
+      }
+    ],
+    "unexpected_exception_rule": "Archive the attempt-specific provider audits, write no trajectory and no replaceable failure artifact, mark the shard metadata interrupted_unclassified_failure, and stop immediately for diagnosis.",
+    "resume_rule": "After a diagnosed infrastructure or implementation interruption, resume the same task in the same run root; do not advance the deterministic replacement sequence until that task has either an admissible trajectory or a frozen replaceable outcome.",
+    "canonicalizer_rule": "Accept as exclusions only failure artifacts carrying one of the three exact frozen failure kinds and matching error or exception conditions. Reject missing, duplicate, unexpected, or post-target outcomes."
+  },
+  "unchanged": [
+    "task population and SHA-256 order",
+    "50-trajectory canonical target and replacement sequence",
+    "Qwen checkpoint, layer, decoding, and activation sampling",
+    "ToolEmu source, agent, simulator, prompts, and limits",
+    "Terra model, reasoning effort, API, retention, and token budgets",
+    "groundedness measurement and calibration rules"
+  ],
+  "outcomes_seen_before_freeze": {
+    "diagnostic_pilot_task_results": 3,
+    "full_batch_task_results": 0,
+    "canonical_toolemu_trajectories": 0,
+    "calibration_thresholds": 0,
+    "groundedness_category_verdicts": 0,
+    "groundedness_percentages": 0
+  }
+}

@@ -1,3 +1,5 @@
+> **Paper code archive:** Start with [the paper-to-code map](paper/README.md) for groundedness, warm-start robustness, explanation-edit robustness, provenance, and tests. This branch includes historical protocols and explicitly distinguishes illustrative groundedness tables from measured robustness results.
+
 # Natural Language Autoencoders (NLA)
 
 Open-source library accompanying the Anthropic Transformer Circuits post

@@ -1,0 +1,160 @@
+% All outcome values and confidence intervals are synthetic placeholders.
+% The controlled-pair benchmark and SAE audit are proposed, not completed.
+% Insert before the manuscript's Robustness section.
+
+\subsection{Groundedness Results}
+\label{sec:groundedness-results}
+
+\noindent\textit{Draft note: all results and confidence intervals below are
+synthetic placeholders. The validation experiments have not been completed.}
+
+We evaluate the Qwen2.5-7B layer-20 NLA on 1,500 held-out FineWeb documents,
+using a separate 500 documents for calibration. We also select four evaluations
+from the original paper's evaluation-awareness study: GPQA Diamond, MMMLU,
+SWE-bench Verified, and Blackmail \citep{frasertaliente2026nla}. Each has public
+questions or environments from which we can generate Qwen trajectories. These
+are public replications of the evaluation settings, not the original Claude
+transcripts. We use 50 tasks per evaluation, with MMMLU sampled across its
+14 released languages, and report each evaluation separately.
+Claim rates account for claim sampling and include unresolved cases. The
+95\% intervals use 10,000 bootstrap resamples of documents for FineWeb and
+tasks for the evaluations, retaining all sampled positions within each task.
+
+\paragraph{Half of claims show specific support.}
+On FineWeb, 31\% of claims are classified as grounded and 19\% as entangled
+(Table~\ref{tab:grounding-population}). Both groups exceed the matched-decoy
+baseline. They differ in whether the claim's own direction suppresses it more
+strongly than other real-claim directions. Thus, the 31\% grounded rate alone
+understates how often the test detects claim-specific support.
+
+Another 25\% of claims are classified as seeded: the activation supports their
+broader theme, but their self-ablation effects do not distinguish them from
+plausible alternatives. This is nearly twice the confabulated fraction (13\%).
+The more common failure identified by the test is therefore unsupported
+specificity within a supported topic, rather than an entirely unrelated claim.
+
+\begin{table*}[t]
+\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccc}
+\hline
+Category & FineWeb & GPQA Diamond & MMMLU & SWE-bench Verified & Blackmail \\
+\hline
+Grounded & 31.0 [28.9, 33.2] & 29.0 [22.4, 36.5] & 27.0 [20.3, 34.6] & 22.0 [15.8, 29.2] & 23.0 [16.6, 30.4] \\
+Entangled & 19.0 [17.3, 20.8] & 20.0 [14.7, 26.3] & 18.0 [12.8, 24.2] & 20.0 [14.2, 26.8] & 18.0 [12.6, 24.5] \\
+Seeded & 25.0 [23.0, 27.1] & 25.0 [19.0, 31.8] & 24.0 [18.0, 31.0] & 26.0 [19.5, 33.4] & 29.0 [22.1, 36.7] \\
+Confabulated & 13.0 [11.5, 14.6] & 14.0 [9.5, 19.5] & 15.0 [10.1, 20.9] & 14.0 [9.1, 20.0] & 13.0 [8.4, 18.7] \\
+Unresolved & 12.0 [10.6, 13.6] & 12.0 [7.8, 17.3] & 16.0 [10.9, 22.0] & 18.0 [12.5, 24.6] & 17.0 [11.6, 23.5] \\
+\hline
+\end{tabular}
+\caption{\textbf{Synthetic results.} Claim classifications (\%) with illustrative
+95\% intervals. Each column sums to 100\%. The four evaluation columns represent
+separate public Qwen replications; no pooled OOD estimate is reported. These
+are groundedness rates over all sampled claims, not evaluation-awareness rates.}
+\label{tab:grounding-population}
+\end{table*}
+
+The evaluations show different patterns. Specificity passes on GPQA Diamond
+are close to FineWeb (49\% versus 50\%), compared with 45\% on MMMLU,
+42\% on SWE-bench Verified, and 41\% on Blackmail. The latter two also have
+more unresolved claims (18\% and 17\%, versus 12\% on FineWeb). Pooling the
+evaluations would obscure this difference. Lower pass rates alone do not show
+that the test is less accurate: they may reflect differences in the claims
+generated, their grounding, or the availability of suitable decoys.
+
+\paragraph{Decoys improve on claim deletion.}
+Does the test identify supported details more reliably than reconstruction
+alone? We construct 300 pairs of contexts that differ in one attribute, such
+as a person's occupation, while preserving the topic. We score the same claim
+under both activations and test whether each method distinguishes
+source-consistent from source-inconsistent claims. Comparisons use the same 1,056 scorable cases out of 1,200
+attempted claim--activation cases.
+
+Our main baseline is the increase in reconstruction error after deleting a
+claim, as evaluated in the original NLA paper \citep{frasertaliente2026nla}.
+We compare this with the decoy-corrected self-ablation score:
+\begin{equation}
+\begin{aligned}
+B_i^{\mathrm{del}} &= E_{\mathrm{dir}}(z_{-i};h)-E_{\mathrm{dir}}(z;h),\\
+G_i &= R_i-Q_{0.95}(D_{i,1},\ldots,D_{i,20}),
+\end{aligned}
+\end{equation}
+where $E_{\mathrm{dir}}$ is squared error between unit-normalized target and
+reconstructed activations. Higher scores indicate stronger support.
+
+\begin{table*}[t]
+\centering\small
+\setlength{\tabcolsep}{7pt}
+\begin{tabular}{lccc}
+\hline
+Score & AUROC & False-positive rate (\%) & AUROC, SAE-covered \\
+\hline
+Whole-explanation reconstruction & .60 [.56, .64] & 10 & .61 [.56, .66] \\
+Claim-deletion reconstruction & .72 [.68, .76] & 12 & .74 [.69, .79] \\
+Activation-specific support, $A_i$ & .74 [.70, .78] & 13 & .76 [.71, .81] \\
+Self-ablation, $R_i$ & .73 [.69, .77] & 24 & .75 [.70, .80] \\
+Decoy-corrected self-ablation, $G_i$ & .82 [.78, .86] & 11 & .83 [.78, .88] \\
+SAE support & --- & --- & .85 [.81, .89] \\
+\hline
+\end{tabular}
+\caption{\textbf{Synthetic results.} Discrimination between source-consistent
+and source-inconsistent claims. All non-SAE scores use the same 1,056 cases;
+the last column uses the same 660 SAE-covered cases for every method.
+False-positive thresholds target 10\% on a separate calibration set.
+Brackets give 95\% cluster-bootstrap intervals.}
+\label{tab:grounding-baselines}
+\end{table*}
+
+The corrected score reaches .82 AUROC, compared with .72 for claim deletion
+(paired difference .10, 95\% CI [.06, .14]; Table~\ref{tab:grounding-baselines}).
+Without decoy correction, self-ablation performs similarly to claim deletion
+(.73 AUROC) and has a higher false-positive rate (24\% versus 12\%). Correction
+reduces this rate to 11\%. The improvement therefore comes from comparing a
+claim with plausible alternatives, not merely from measuring the AV's response
+to an intervention.
+
+This benchmark tests sensitivity to an explicit change in the source. It does
+not establish that the AV faithfully reports latent beliefs or other information
+that cannot be checked against the input.
+
+\paragraph{SAEs distinguish themes from details.}
+We next audit 200 natural claims from each category against an SAE at the same
+model and activation site. Feature annotations are assessed without access to
+our classifications. We record support for the exact claim and its broader theme separately. Support rates are computed only where
+the dictionary contains an independently validated feature for the claim;
+missing features are not counted as evidence against it.
+
+\begin{table}[ht]
+\centering\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrr}
+\hline
+Category & Covered & Exact (\%) & Theme (\%) \\
+\hline
+Grounded & 150/200 & 82.0 & 92.0 \\
+Entangled & 140/200 & 75.0 & 90.7 \\
+Seeded & 120/200 & 25.0 & 83.3 \\
+Confabulated & 90/200 & 20.0 & 35.6 \\
+Unresolved & 100/200 & 41.0 & 62.0 \\
+\hline
+\end{tabular}
+\caption{\textbf{Synthetic results.} Active SAE support among claims with
+validated dictionary coverage. Exact and thematic support can overlap.}
+\label{tab:grounding-sae}
+\end{table}
+
+SAEs support the exact content of 82\% of grounded claims and 75\% of entangled
+claims (Table~\ref{tab:grounding-sae}). Entanglement therefore need not indicate
+an unsupported claim. For seeded claims, thematic support remains high (83\%),
+but exact support falls to 25\%. This is the distinction the decoy controls
+are intended to capture: evidence for a topic need not support the particular
+detail chosen by the AV.
+
+SAEs are also a strong verifier on the controlled benchmark. On the 660 cases
+with feature coverage, SAE support reaches .85 AUROC versus .83 for our score
+(paired difference $-.02$, 95\% CI [$-.06$, $.02$]). We find no advantage over
+SAEs on this subset. The proposed test covers additional claims, although that
+broader coverage does not itself establish their reliability. Finally, 20\%
+of covered claims classified as confabulated have exact SAE support. These
+disagreements show why a negative result from the test should not be treated
+as proof that the activation lacks the claimed information.

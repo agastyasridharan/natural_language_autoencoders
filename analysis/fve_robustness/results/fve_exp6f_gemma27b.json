@@ -1,0 +1,19 @@
+{
+  "key": "gemma27b",
+  "arm": "exp6f",
+  "model": "Gemma-3-27B",
+  "layer": 41,
+  "n_paired": 2000,
+  "n_dropped_empty": 0,
+  "FVE_base": 0.7677,
+  "FVE_arm": 0.7305,
+  "dFVE": -0.0371,
+  "dFVE_ci95": [
+    -0.0407,
+    -0.0335
+  ],
+  "mean_cos_base": 0.9933,
+  "mean_cos_arm": 0.9922,
+  "mean_dcos": -0.0011,
+  "wilcoxon_p": null
+}

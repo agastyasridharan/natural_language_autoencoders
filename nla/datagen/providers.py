@@ -10,8 +10,9 @@ provider's problem.
 Swap via `--provider-cls my.module.MyProvider` at stage2 invocation.
 """
 
-import asyncio
+import os
 from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor
 
 import anthropic
 
@@ -36,26 +37,33 @@ class CompletionProvider(ABC):
 
 
 class AnthropicProvider(CompletionProvider):
-    """Default provider: Anthropic Messages API with bounded async concurrency.
+    """Default provider: Anthropic Messages API with bounded THREAD concurrency.
+
+    SYNC implementation. A single persistent `anthropic.Anthropic` client (an
+    httpx *sync* connection pool) is created lazily and REUSED for every
+    complete() call; concurrency within a batch comes from a ThreadPoolExecutor.
+
+    This deliberately replaces the earlier asyncio.run()-per-call design. That
+    version opened a fresh event loop on every batch, and the AsyncAnthropic/httpx
+    pool bound to each now-closed loop orphaned its ESTAB connections. Across the
+    hundreds of leakage/grader batches in an E0+CF1 run those orphans accumulated
+    (observed: proxy connection count climbing 15 -> 35+ while the run made no
+    progress) until the shared forward proxy choked and new requests hung. A
+    persistent sync client keep-alives a small pool and never orphans it, so the
+    connection count stays flat across the whole run. (`httpx.Client` is
+    thread-safe for concurrent request sends, which the executor relies on.)
 
     The SDK handles transport-level retries (408/429/5xx, exponential backoff
-    with jitter, respects Retry-After). High `max_retries` extends the retry
-    window for sustained rate-limit storms — at max_retries=100 the SDK will
-    keep backing off for minutes before giving up on one prompt.
-
-    Per-prompt failures after exhausting retries return None (caller drops
-    the row). `gather(return_exceptions=True)` collects these without nuking
-    the whole batch — otherwise one stubborn 429 in a chunk of 512 wastes
-    the other 511 API calls. ONLY `RateLimitError` and server-side 5xx are
-    tolerated; anything else (auth, bad request, unexpected content) still
-    raises — those are code bugs, not transient.
-
-    Calls `asyncio.run()` — do not invoke from inside a running event loop.
-    Stage 2 is a standalone CLI, so this is fine in practice.
+    with jitter, respects Retry-After). Per-prompt failures after exhausting
+    retries — and per-request timeouts — return None (caller drops the row).
+    ONLY RateLimitError, server-side 5xx, and connection/timeout errors are
+    tolerated; anything else (auth, bad request, unexpected content) still raises,
+    because those are code bugs, not transient.
     """
 
     # Exceptions from which we degrade to None instead of killing the batch.
-    # Anything NOT in this tuple is a code bug and should still blow up loud.
+    # APIConnectionError covers APITimeoutError (the per-request timeout below),
+    # so a stuck tunnel fails fast as a dropped row rather than hanging the batch.
     _TOLERATED = (
         anthropic.RateLimitError,
         anthropic.InternalServerError,
@@ -69,25 +77,41 @@ class AnthropicProvider(CompletionProvider):
         temperature: float = 1.0,
         concurrency: int = 32,
         max_retries: int = 10,
+        timeout: float = 60.0,
     ):
-        self.client = anthropic.AsyncAnthropic(max_retries=max_retries)
+        # Concurrency may need throttling when egress goes through a shared
+        # forward proxy (set NLA_GRADER_CONCURRENCY). The sync client is built
+        # ONCE (lazily) and reused, so connections are pooled, not churned.
         self.model = model
         self.max_tokens = max_tokens
         self.temperature = temperature
-        self.concurrency = concurrency
+        self.concurrency = max(1, int(os.environ.get("NLA_GRADER_CONCURRENCY", concurrency)))
+        self.max_retries = max_retries
+        self.timeout = timeout
+        self._client = None  # lazy, persistent across complete() calls
 
-    async def _one(self, sem: asyncio.Semaphore, prompt: str) -> str | None:
-        async with sem:
-            resp = await self.client.messages.create(
+    def _client_handle(self):
+        if self._client is None:
+            self._client = anthropic.Anthropic(
+                max_retries=self.max_retries, timeout=self.timeout)
+        return self._client
+
+    def _one(self, prompt: str):
+        """Run one prompt. Returns (status, text) with status in
+        {'ok','refused','fail'}; raises on non-tolerated (code-bug) errors."""
+        client = self._client_handle()
+        try:
+            resp = client.messages.create(
                 model=self.model,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
                 messages=[{"role": "user", "content": prompt}],
             )
+        except self._TOLERATED:
+            return ("fail", None)
         # refusal: source text tripped safety — no answer coming, drop this row.
-        # content may be [] or the refusal message; either way, no explanation.
         if resp.stop_reason == "refusal":
-            return None
+            return ("refused", None)
         assert resp.stop_reason in ("end_turn", "max_tokens"), (
             f"unexpected stop_reason={resp.stop_reason!r} (want end_turn/max_tokens/refusal)"
         )
@@ -96,34 +120,28 @@ class AnthropicProvider(CompletionProvider):
         )
         text = resp.content[0].text.strip()
         assert text, "empty completion — refusing to emit blank explanation"
-        return text
+        return ("ok", text)
 
     def complete(self, prompts: list[str]) -> list[str | None]:
-        async def _run() -> list[str | None | BaseException]:
-            sem = asyncio.Semaphore(self.concurrency)
-            return await asyncio.gather(
-                *(self._one(sem, p) for p in prompts),
-                return_exceptions=True,
-            )
-
-        raw = asyncio.run(_run())
+        if not prompts:
+            return []
+        workers = min(self.concurrency, len(prompts))
+        # ThreadPoolExecutor.map preserves input order. A non-tolerated exception
+        # in _one propagates here (loud), matching the old gather() re-raise.
+        with ThreadPoolExecutor(max_workers=workers) as ex:
+            results = list(ex.map(self._one, prompts))
         out: list[str | None] = []
         n_failed = 0
         n_refused = 0
-        for i, r in enumerate(raw):
-            if isinstance(r, str):
-                out.append(r)
-            elif r is None:
+        for status, text in results:
+            if status == "ok":
+                out.append(text)
+            elif status == "refused":
                 n_refused += 1
                 out.append(None)
-            elif isinstance(r, self._TOLERATED):
+            else:
                 n_failed += 1
                 out.append(None)
-            elif isinstance(r, BaseException):
-                # Not a transient — auth/schema/code bug. Blow up loud.
-                raise r
-            else:
-                raise AssertionError(f"gather returned unexpected type at [{i}]: {type(r).__name__}")
         if n_failed or n_refused:
             print(f"  [AnthropicProvider] dropped {n_refused} refused + {n_failed} retry-exhausted of {len(prompts)}")
         return out

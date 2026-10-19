@@ -1,0 +1,274 @@
+schema_version: 7
+protocol_name: qwen_nla_groundedness_replication_v7
+frozen_at_utc: "2026-08-27T00:00:00Z"
+seed: 20260827
+status: frozen_before_outcome_generation
+supersedes: qwen_nla_groundedness_replication_v6
+revision_reason: >-
+  The V6 decoy audit was stopped after 12 completed claims and one failure,
+  before any numerical outcome generation. The failed 64-candidate pool repeated
+  one sentence with only trailing whitespace changed. The immutable V6 selection
+  and failing generation-response SHA-256 values are
+  f5e26640655848ce44cab381f589f1209b168a61decbbecd715f8de6f7fccd62 and
+  bb7cfbb0fa520900629ad280f79880574f429ac57a485e0fd44197dfbaf1db47.
+  A conditional full-pool regeneration prompt was developed only on that exposed
+  failure and returned 64 strip-and-casefold-unique candidates; its cache SHA-256
+  is 847cf3655f0944e326ff567535ff40beb671bead9c63c93e7568a715a7c800f6.
+  V7 permits exactly one fixed complete replacement call when the primary pool
+  is empty or duplicated after strip and casefold. The invalid proposal is never
+  part of the candidate pool. All partial V6 decoy artifacts are excluded and
+  all 25 FineWeb decoy-audit claims are rerun from fresh caches.
+
+compatible_upstream_artifacts:
+  av_generation:
+    protocol_sha256: bc76dd8b3973bb20433493b2f7bc26d8721c71dbc102488991fe2f0d3c6ca96f
+    ordered_file_hash_aggregate_sha256: e6c801a0c505a5032a85f9c85f68e58c0be5079bd4c420774f3f5f8968cd0417
+    records: 2000
+    compatibility_basis: >-
+      V3 changes only downstream text segmentation. Target, checkpoint revisions,
+      injection, sampling, parsing, seeds, and every AV-generation setting are
+      byte-for-byte unchanged from V2. Each V3 segmented record records the
+      source V2 AV artifact hash and protocol hash.
+  segmentation:
+    protocol_sha256: dec84cf79065990ddd4b5c0d8def8aabcb23553f820984ca82a05a6b49e9cca7
+    ordered_file_hash_aggregate_sha256: 7ae82a89700cee89754a9469fea2bc9a56f7a68dea4bf1a3fdfe1d46497daca1
+    records: 100
+    status_sha256: f98e2ef44caece277c2eff8afdc6aafa85ce621f68ca65693cf9083e49969591
+    selection_sha256: 0c5c55c7bf2a47f684c8d5b4585d8df906c910957780105d94212751ed09e187
+    structural_failures: 0
+    compatibility_basis: >-
+      V6 changes only the downstream ordered judgment schema. The V5 range
+      segmentation prompts, validation, selection, and outputs are unchanged.
+      Each V6 decoy cache retains the source V5 segmented-record hash.
+
+scope:
+  primary_estimand: claim_weighted_groundedness_category_percentages
+  categories: [grounded, entangled, seeded, confabulated, unresolved]
+  robustness_experiments_in_scope: false
+  checkpoint_comparisons_in_scope: false
+  attribution_evaluated_only_if_specificity_passes: true
+  residual_weak_theme_high_support_branch: unresolved
+
+source_report:
+  main_sha256: 6cd2b69b9172c975d71cccf04e18527110386454dcc3dc4d326517433236046f
+  appendix_sha256: b6b0cedb25771ec0110cfca9f9e137a7838792dd48877cf8f7fc0870bf87211f
+  bundle_sha256: ea7d2316e7a23ea1cf51eaf326627902cc150da0ba523b2538a1b8ac9b2adf97
+
+models:
+  target:
+    repo_id: Qwen/Qwen2.5-7B-Instruct
+    revision: a09a35458c702b33eeacc393d103063234e8bc28
+    layer: 20
+  verbalizer:
+    repo_id: kitft/nla-qwen2.5-7b-L20-av
+    revision: b88469162777ae6553bc14208eb0cb579336f8f4
+    inference:
+      samples_per_activation: 1
+      do_sample: true
+      temperature: 1.0
+      top_p: 1.0
+      max_new_tokens: 500
+      rng: sha256_keyed_by_seed_and_activation_id
+      generation_order_independent: true
+      explanation_parse_rule: require_opening_explanation_tag_and_take_text_until_closing_tag_or_eos
+      missing_opening_tag_rule: unresolved_generation_failure
+  reconstructor:
+    repo_id: kitft/nla-qwen2.5-7b-L20-ar
+    revision: e2c9e57eac213d37a31612087f645ab6332c1bb6
+  injection_scale: 150.0
+  activation_preprocessing: unit_l2_once_before_injection_or_projection
+  justification: >-
+    This is the only public matched AV/AR Qwen checkpoint pair at a specified
+    target-model layer. It isolates one architecture, layer, and NLA training
+    recipe, fits on one H100, and avoids a post-outcome checkpoint choice.
+    The verbalizer sampling temperature reproduces the published NLA method,
+    and the 500-token budget matches its stated approximate inference length;
+    a keyed draw makes each activation reproducible without changing that
+    sampling distribution.
+
+openai_text_pipeline:
+  model: gpt-5.6-luna
+  reasoning_effort: low
+  api: responses
+  api_key_environment_variable: OPENAI_API_KEY_2
+  allow_fallback_key: false
+  allow_fallback_model: false
+  store: false
+  structured_outputs_strict: true
+  request_and_response_sha256_recorded: true
+  resolved_model_and_system_fingerprint_recorded: true
+  uses:
+    - exact_claim_substring_identification_with_deterministic_connective_gaps
+    - claim_class_and_subtype
+    - candidate_decoy_generation
+    - source_absence_judgment
+    - splice_naturalness_judgment
+  justification: >-
+    Luna is the cost-sensitive high-volume GPT-5.6 tier and supports strict
+    structured outputs. It is frozen before outcomes and is approximately one
+    tenth of Terra's token price. No model substitution is permitted after an
+    outcome is inspected.
+  segmentation:
+    representation: ordered_nonoverlapping_inclusive_ranges_over_lossless_indexed_chunks
+    chunk_regex: '\w+|[^\w\s]|\s+'
+    chunk_invariant: concatenated_chunks_equal_explanation_byte_for_byte
+    boundary_rule: first_and_last_chunks_must_be_non_whitespace
+    range_rule: ranges_are_in_source_order_and_may_not_overlap_or_nest
+    extraction_rule: slice_original_explanation_at_the_returned_chunk_boundaries
+    connective_rule: every_maximal_gap_before_between_or_after_claims
+    conditional_adjudication:
+      trigger: primary_response_fails_structural_validation
+      maximum_calls: 1
+      input: [indexed_source_chunks, invalid_primary_inventory, exact_validation_error]
+      output: complete_replacement_inventory
+      cache_and_audit_both_responses: true
+    prohibited_code_repairs: [range_sorting, range_clipping, overlap_resolution, fuzzy_matching, whitespace_normalization]
+    failure_rule: reject_if_the_primary_or_when_used_adjudicated_final_inventory_is_invalid
+  candidate_judgments:
+    response_rows: 64
+    row_order: exact_candidate_input_order
+    model_generated_candidate_index: false
+    assigned_index: zero_based_array_position
+
+sampling:
+  fineweb:
+    dataset: HuggingFaceFW/fineweb
+    config: sample-10BT
+    revision: 9bb295ddab0e05d785b879661af7260fed5140fc
+    source_sampling:
+      total_rows_at_revision: 14868862
+      blocks: 80
+      rows_per_block: 100
+      block_selection: first_80_unique_sha256_seeded_block_indices
+      block_order: selection_order
+      staged_documents: 8000
+      revision_gate: require_hub_main_sha_equal_to_frozen_revision_before_datasets_server_fetch
+      archive_each_response_sha256: true
+      activation_selection: first_2000_eligible_documents_in_staged_order
+    documents_total: 2000
+    calibration_documents: 500
+    evaluation_documents: 1500
+    activations_per_document: 1
+    split_unit: doc_id
+    split_method: sha256_rank
+  ood:
+    evaluation_families: 16
+    completed_trajectories_per_family: 50
+    activations_per_trajectory_max: 4
+    activation_position_sampling: uniform_without_replacement_keyed_by_seed_and_trajectory_id
+    eligible_tokens: assistant_natural_language_response_tokens_excluding_tool_calls_and_special_tokens
+    minimum_left_context_tokens: 50
+    short_trajectory_rule: use_all_eligible_positions_if_fewer_than_four
+    generation:
+      target_model: Qwen/Qwen2.5-7B-Instruct
+      do_sample: false
+      temperature: null
+      task_order: sha256_rank
+      public_environment_pins_required: true
+      label: public_Qwen_replication_not_original_Claude_transcript
+  claims:
+    scored_per_activation_max: 3
+    method: simple_random_sample_without_replacement_keyed_by_seed_and_activation_id
+    include_all_if_at_most_three: true
+    inclusion_probability: min_3_n_divided_by_n
+    analysis_weight: inverse_inclusion_probability
+    ownership_competitors: all_other_real_claims_in_the_explanation
+
+decoys:
+  k: 20
+  candidates_generated_per_scored_claim: 64
+  accepted_candidate_pool_per_scored_claim: 64
+  candidate_pool_validation: all_nonempty_and_pairwise_unique_after_strip_and_casefold
+  invalid_pool_regeneration:
+    trigger: primary_pool_fails_candidate_pool_validation
+    maximum_calls: 1
+    output: complete_replacement_pool_of_64
+    invalid_proposal_is_part_of_final_pool: false
+    cache_and_audit_both_responses: true
+  candidate_order_frozen_before_numerical_measurement: true
+  selected_by: first_generation_indices_passing_all_filters_at_first_successful_overlap_rung
+  quantile:
+    probability: 0.95
+    convention: Hyndman_Fan_type_7_linear
+    numpy_equivalent: numpy.quantile_values_0.95_method_linear
+  relative_overlap_ladder: [0.10, 0.20, 0.35, 0.50, 0.75, 1.00]
+  if_fewer_than_k_at_final_rung: unresolved
+  source_absence_scope:
+    fineweb: exact_causal_document_prefix_through_the_activation_token
+    ood: exact_serialized_target_model_context_through_the_activation_token
+    excludes: text_or_tool_results_after_the_activation_position
+
+calibration:
+  permitted_data:
+    - fineweb_calibration_documents_only
+    - deranged_activation_negative_controls_within_fineweb_calibration_only
+  forbidden_data:
+    - fineweb_evaluation_documents
+    - any_ood_evaluation
+    - any_ood_outcome
+  shuffled_activation_derangement:
+    method: one_seeded_cyclic_derangement_after_sha256_rank
+    same_claim_text_and_directions: true
+    no_activation_fixed_points: true
+  threshold_quantile:
+    probability: 0.95
+    convention: Hyndman_Fan_type_7_linear
+  nuisance_match_selection:
+    target_calibration_claim_resolvability: 0.90
+    eps_base_grid: [0.25, 0.50, 0.75, 1.00, 1.50, 2.00]
+    eps_reconstruction_grid: [0.10, 0.20, 0.35, 0.50, 0.75, 1.00]
+    selection_rule: >-
+      Select the feasible pair with the smallest sum of grid ranks for which at
+      least 90 percent of calibration claims retain k controls at the final
+      overlap rung; break ties by smaller eps_base, then smaller
+      eps_reconstruction. If no pair is feasible, freeze the largest pair and
+      report the achieved resolvability without expanding either grid.
+  tau_decoy_support: q95_of_decoy_activation_support_under_deranged_activation
+  kappa_spec: q95_of_R_minus_Q95_D_under_deranged_activation
+  kappa_theme: q95_of_median_X_under_deranged_activation
+  kappa_support: q95_of_real_claim_activation_support_under_deranged_activation
+  rho_own: 1.5
+  freeze_artifact_before_evaluation: true
+
+manual_audit:
+  blinded_before_numerical_outcomes: true
+  segmentation_items: 200
+  decoy_items: 400
+  sampling: equal_fineweb_and_ood_with_ood_equal_family_allocation
+  segmentation_acceptance:
+    exact_tiling_failures_allowed: 0
+    atomic_claim_acceptability_minimum: 0.90
+    claim_inventory_completeness_minimum: 0.90
+  decoy_acceptance:
+    source_absence_agreement_minimum: 0.90
+    splice_naturalness_agreement_minimum: 0.90
+  action_if_gate_fails: >-
+    Stop expansion, revise prompts using audit items only, increment the
+    protocol version, discard all affected automated labels, and rerun the
+    blinded audit. Do not switch models based on groundedness outcomes.
+
+inference:
+  estimand: all_segmented_claims_in_sampled_activations
+  unresolved_in_primary_denominator: true
+  resolved_only_percentages_secondary: true
+  confidence_level: 0.95
+  bootstrap:
+    replicates: 10000
+    seed: 20260827
+    resampling_unit_fineweb: document
+    resampling_unit_ood: transcript
+    method: percentile_cluster_bootstrap
+    preserve_inverse_probability_claim_weights: true
+  ood_aggregate: equal_weight_macro_average_over_16_families
+  forbidden_interval: claim_iid_interval
+
+quality_and_exclusions:
+  retain_failed_benchmark_trajectories: true
+  exclude_only:
+    - environment_or_harness_failure_before_any_valid_assistant_response
+    - no_eligible_assistant_token_after_minimum_context_rule
+    - nonfinite_activation
+  replacement_rule: take_next_sha256_ranked_task_until_50_analyzable_trajectories
+  report_all_exclusion_counts_and_reasons: true
+  exact_injection_marker_in_generated_av_explanation: hard_injection_failure
+  other_cjk_in_generated_av_explanation: retain_and_report_as_language_mixing

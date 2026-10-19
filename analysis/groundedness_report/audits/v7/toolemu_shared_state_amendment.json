@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-10T21:06:40Z",
+  "protocol_sha256": "20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637",
+  "text_model_correction_amendment_sha256": "fcd5d50f6f863337d9e9009b1129354afad1ce6dbff17b0510132d0b5d423966",
+  "toolemu_noncyber_scope_amendment_sha256": "655e8d38f2a2e1c51167e12c56baf30fa0c2193e9f2663c73bd113b2c39c5b19",
+  "toolemu_bounded_simulator_amendment_sha256": "407c80a5b9c275599db7018f14146d28d9de987d34fae2b7636d60d1ef7cb426",
+  "toolemu_format_budget_amendment_sha256": "867231016e6cf08c46ea1f0295bef9b6f4fdc2888deac1748cf3b4d02c0cd71f",
+  "status": "frozen_after_second_diagnostic_and_before_any_admissible_toolemu_trajectory",
+  "diagnostic_run": {
+    "remote_path": "/data/agastyas/nla_groundedness_qwen_v2/ood/toolemu-noncyber-terra-pilot-v9",
+    "assigned_task_ids": [
+      "official_99",
+      "official_92",
+      "official_136"
+    ],
+    "manual_stop_reason": "The first completed trajectory exposed that LangChain shallow-copies the chat-model wrappers. Mutable trace and activation-reservoir lists were shared across copies, but scalar eligible-position and simulator-budget counters were copied by value. The saved zero scalar counters were inconsistent with the retained records, and the simulator budget was not reliably enforceable across wrapper copies.",
+    "terra_calls": 7,
+    "input_tokens": 42649,
+    "output_tokens": 4117,
+    "reasoning_tokens": 505,
+    "estimated_cost_usd": 0.134702,
+    "pricing_assumption_usd_per_million_tokens": {
+      "input": 2.0,
+      "output": 12.0
+    },
+    "completed_trajectories": 1,
+    "completed_trajectory_task_ids": [
+      "official_99"
+    ],
+    "saved_activation_vectors": 4,
+    "task_failures": [
+      {
+        "task_id": "official_92",
+        "reason": "no eligible assistant-language token"
+      }
+    ],
+    "interrupted_task_ids": [
+      "official_136"
+    ],
+    "admissibility": "diagnostic_excluded",
+    "file_count": 14,
+    "total_bytes": 431839,
+    "canonical_file_manifest_sha256": "ebe726e4ea0ef5c637602ba167d6f8e3ca42d598eb0557a9efb96bb916d9834c"
+  },
+  "correction": {
+    "state_rule": "Store every mutable collection and counter used by each local-Qwen or Terra wrapper inside one shared mutable state object. LangChain shallow copies must reference that same object, so all copies observe identical call counts, cumulative token counts, traces, activation reservoirs, and eligible-position counts.",
+    "semantic_scope": "State ownership and accounting only. No model prompt, generated text, token, activation vector, task, parsing rule, sampling rule, or budget threshold changes.",
+    "validation_rule": "A completed trajectory must have internally consistent shared counters: eligible_position_population must be at least the retained activation count; simulator budget counters must equal the archived call count and summed input-token usage; and every call audit must carry this amendment hash."
+  },
+  "corrected_pilot": {
+    "cases": 3,
+    "task_ids": [
+      "official_99",
+      "official_92",
+      "official_136"
+    ],
+    "promotion_rule": "Only outputs from a clean post-amendment root may enter the canonical set, and only if this amendment and every parent amendment remain unchanged after inspection.",
+    "success_gate": "Each retained trajectory must terminate without infrastructure or budget interruption, preserve complete Terra call audits, pass the shared-counter consistency checks, and contain at least one eligible assistant-language activation position. Tasks with no eligible assistant-language position remain excluded under the frozen global rule and are not converted into zero-activation trajectories.",
+    "full_run_rule": "Do not start the remaining 47 non-Cyber cases until the clean corrected pilot's usage, terminal states, exclusions, failures, and activation counts are reported."
+  },
+  "unchanged": [
+    "official ToolEmu source and prompts",
+    "Qwen checkpoint, layer, decoding, and agent type",
+    "Terra model, reasoning effort, API, and retention setting",
+    "format adapter and every simulator budget",
+    "five agent iterations and per-call output-token limits",
+    "task selection, ordering, and non-Cyber scope",
+    "activation-position sampling",
+    "groundedness measurement and calibration rules"
+  ],
+  "outcomes_seen_before_freeze": {
+    "admissible_toolemu_trajectories": 0,
+    "admissible_toolemu_activations": 0,
+    "calibration_thresholds": 0,
+    "groundedness_category_verdicts": 0,
+    "groundedness_percentages": 0
+  }
+}

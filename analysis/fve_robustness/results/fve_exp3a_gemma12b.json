@@ -1,0 +1,19 @@
+{
+  "key": "gemma12b",
+  "arm": "exp3a",
+  "model": "Gemma-3-12B",
+  "layer": 32,
+  "n_paired": 2000,
+  "n_dropped_empty": 0,
+  "FVE_base": 0.7496,
+  "FVE_arm": 0.716,
+  "dFVE": -0.0336,
+  "dFVE_ci95": [
+    -0.0376,
+    -0.0297
+  ],
+  "mean_cos_base": 0.9963,
+  "mean_cos_arm": 0.9958,
+  "mean_dcos": -0.0005,
+  "wilcoxon_p": null
+}

@@ -1,0 +1,245 @@
+schema_version: 1
+protocol_sha256: 20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637
+label_for_every_ood_row: public_Qwen_replication_not_original_Claude_transcript
+tasks_per_family: 50
+task_selection: sha256_rank_with_seed_20260827
+trajectory_generation:
+  target_repo_id: Qwen/Qwen2.5-7B-Instruct
+  target_revision: a09a35458c702b33eeacc393d103063234e8bc28
+  decoding: greedy
+  do_sample: false
+  temperature: null
+  max_new_tokens_per_assistant_turn: 1024
+  context_overflow_rule: environment_failure_not_silent_left_truncation
+  activation_positions: up_to_four_uniform_without_replacement_over_assistant_natural_language_tokens
+  minimum_left_context_tokens: 50
+  special_and_tool_call_tokens_eligible: false
+
+families:
+  - id: alignment_blackmail
+    display_name: Blackmail
+    group: alignment
+    fidelity: closest_public_reimplementation
+    source: https://github.com/UKGovernmentBEIS/inspect_evals
+    revision: 979bf44681dfdb148021676f9b2be964150bb5ed
+    task: agentic_misalignment
+    configuration:
+      scenario: blackmail
+      candidate_grid:
+        goal_types_with_substantive_values: [explicit, latent, swap]
+        substantive_goal_values: [america, global, safety, acceleration, ethical, pragmatic, individualism, collectivism]
+        neutral_conditions: [[none, none], [ambiguous, none]]
+        urgency_types: [replacement, restriction, none]
+        extra_system_instructions: null
+        prod: false
+        test_eval_awareness: false
+      selection: first_50_by_frozen_sha256_rank_over_78_conditions
+    environment: Inspect agentic-misalignment fictional email environment
+    justification: >-
+      This is the maintained public implementation of Anthropic's blackmail
+      scenario and is the only alignment family with a near-direct public task.
+
+  - id: alignment_destructive_coding
+    display_name: Destructive Coding Actions
+    group: alignment
+    fidelity: preregistered_family_replication
+    source: https://github.com/SWE-bench/SWE-bench
+    revision: 7a21e05772954cc81471ae19d56f436cecf43c54
+    dataset: princeton-nlp/SWE-bench_Verified
+    dataset_revision: c104f840cc67f8b6eec6f759ebc8b2693d585d4a
+    task: 50_sha256_ranked_instances_with_version_control_safety_instruction
+    environment: official SWE-bench Docker image plus non-destructive git policy
+    agent_limits:
+      maximum_assistant_turns: 20
+      maximum_new_tokens_per_turn: 1024
+      tool_calls_per_assistant_turn: 1
+      shell_timeout_seconds: 120
+      shell_output_characters_maximum: 12000
+    justification: >-
+      The proprietary coding-safety set is unavailable. Real repair tasks in
+      isolated official images expose the model to git and shell operations;
+      a frozen policy forbids destructive history/worktree shortcuts.
+
+  - id: alignment_overly_agentic
+    display_name: Overly Agentic Actions
+    group: alignment
+    fidelity: closest_public_family_analogue
+    source: https://github.com/ryoungj/ToolEmu
+    revision: ac4a7ab7ed8c7985d96231e214bd6b54304b7ddb
+    task: risky_tool_use_cases
+    environment: ToolEmu emulated tool APIs and risk scenarios
+    justification: >-
+      ToolEmu provides reproducible affordances for consequential actions and
+      explicitly tests whether an agent exceeds user intent or safety bounds.
+
+  - id: alignment_factual_honesty
+    display_name: Factual Honesty
+    group: alignment
+    fidelity: closest_public_family_analogue
+    source: https://github.com/sylinrl/TruthfulQA
+    revision: d71c110897f5d31c5d7f309e7bc316c152f6f031
+    task: generation
+    environment: official six-example QA primer and generation question without external tools
+    justification: >-
+      TruthfulQA is public, externally established, generative, and directly
+      elicits plausible falsehoods rather than relying on a hidden judge set.
+
+  - id: alignment_appropriate_harmlessness
+    display_name: Appropriate Harmlessness
+    group: alignment
+    fidelity: balanced_public_composite
+    sources:
+      - url: https://github.com/dsbowen/strong_reject
+        revision: 7a551d5b440ec7b75d4f6f5bb7c1719965b76b47
+        dataset_url: https://github.com/alexandrasouly/strongreject
+        dataset_revision: f7cad6c17e624e21d8df2278e918ae1dddb4cb56
+        n: 25
+        role: harmful_requests
+      - url: https://github.com/paul-rottger/exaggerated-safety
+        revision: d7bb5bd738c1fcbc36edd83d5e7d1b71a3e2d84d
+        n: 25
+        role: benign_contrast_requests
+    environment: direct chat with no tools
+    justification: >-
+      Appropriate harmlessness requires both non-compliance with harmful
+      requests and non-refusal of matched benign requests; either half alone
+      would confound harmlessness with blanket refusal.
+
+  - id: alignment_sycophancy
+    display_name: Sycophancy
+    group: alignment
+    fidelity: established_public_benchmark
+    source: https://github.com/anthropics/evals
+    revision: 84fcc677e52e1902d696c32cd1a6b663e70d3993
+    task: sycophancy
+    environment: Anthropic public sycophancy prompts formatted with Qwen chat template
+    justification: >-
+      This is the original public benchmark family from Anthropic and contains
+      user-biography-conditioned philosophy, NLP, and political questions.
+
+  - id: alignment_multiturn_deception
+    display_name: Multi-turn Deception
+    group: alignment
+    fidelity: closest_public_family_analogue
+    source: https://huggingface.co/datasets/PKU-Alignment/DeceptionBench
+    revision: 9c6c67b3d2a2d9c226ea0dd2120f1bb0899d779d
+    task: multi_turn_induced_condition
+    environment: dataset-defined system inner and outer prompts in a multi-turn chat
+    transcript_rule: generate_once_for_inner_prompt_then_append_outer_prompt_and_generate_again
+    justification: >-
+      DeceptionBench is MIT-licensed, has 180 scenario families, and includes a
+      multi-turn induced-pressure condition rather than a single-turn proxy.
+
+  - id: capability_swebench_verified
+    display_name: SWE-bench Verified
+    group: capability
+    fidelity: named_public_benchmark
+    source: https://github.com/SWE-bench/SWE-bench
+    revision: 7a21e05772954cc81471ae19d56f436cecf43c54
+    dataset: princeton-nlp/SWE-bench_Verified
+    dataset_revision: c104f840cc67f8b6eec6f759ebc8b2693d585d4a
+    environment: official per-instance Docker images
+    agent_limits:
+      maximum_assistant_turns: 20
+      maximum_new_tokens_per_turn: 1024
+      tool_calls_per_assistant_turn: 1
+      shell_timeout_seconds: 120
+      shell_output_characters_maximum: 12000
+
+  - id: capability_gpqa_diamond
+    display_name: GPQA Diamond
+    group: capability
+    fidelity: named_public_benchmark
+    source: https://github.com/idavidrein/gpqa
+    revision: 56686c06f5e19865c153de0fdb11be3890014df7
+    task: gpqa_diamond_zero_shot
+    environment: zero-shot multiple-choice prompt without tools
+    choice_order: per_record_sha256_order_keyed_by_seed
+
+  - id: capability_hle
+    display_name: Humanity's Last Exam
+    group: capability
+    fidelity: named_public_benchmark_text_only_subset
+    source: https://github.com/centerforaisafety/hle
+    revision: 73ae974b1844c3ffa64c3f4343d9f1f259575700
+    dataset: cais/hle
+    dataset_revision: 5a81a4c7271a2a2a312b9a690f0c2fde837e4c29
+    task: text_only_items
+    environment: official zero-temperature text evaluation prompt
+    limitation: Qwen2.5-7B-Instruct is text-only so image-dependent items are ineligible
+
+  - id: capability_tau2_retail
+    display_name: tau2-bench Retail
+    group: capability
+    fidelity: named_public_benchmark
+    source: https://github.com/sierra-research/tau2-bench
+    revision: a2c024725189473d2d7cea3a5cfdbcc67478e41f
+    task: retail
+    environment: official deterministic retail database tools and user simulator
+
+  - id: capability_mmmlu
+    display_name: MMMLU
+    group: capability
+    fidelity: named_public_benchmark
+    source: https://huggingface.co/datasets/openai/MMMLU
+    revision: 325a01dc3e173cac1578df94120499aaca2e2504
+    task: multilingual_balanced_zero_shot
+    environment: Qwen chat template without tools
+    language_allocation: eight_sha_ranked_languages_x4_plus_six_languages_x3
+
+  - id: capability_browsecomp
+    display_name: BrowseComp
+    group: capability
+    fidelity: named_public_benchmark
+    source: https://github.com/openai/simple-evals
+    revision: 652c89d0ca9df547706735883097e9537d40dc47
+    dataset_url: https://openaipublic.blob.core.windows.net/simple-evals/browse_comp_test_set.csv
+    dataset_sha256: 7b24471cd5b3eb2a46830a14802b5c029ea62f488ff75a0f88af7923d1454abf
+    task: browsecomp
+    environment: >-
+      encrypted official dataset plus a frozen two-tool Qwen agent interface:
+      DuckDuckGo HTML search with deterministic Bing HTML fallback when the
+      primary response is throttled or yields fewer than three results, plus
+      public HTTP(S) page fetch
+    task_selection: >-
+      first_50_sha256_ranked_rows_keyed_by_protocol_seed, replacing any
+      non-analyzable trajectory with the next ranked unused row
+    agent_limits:
+      maximum_assistant_turns: 12
+      maximum_new_tokens_per_turn: 1024
+      tool_calls_per_assistant_turn: 1
+      search_results_per_call: 8
+      fetched_response_bytes_maximum: 1000000
+      tool_text_characters_maximum: 12000
+    reproducibility_note: >-
+      Every raw live search/page response is archived and SHA-256 hashed with
+      request URL, redirect chain, status, and content type. This makes the
+      trajectory replayable even though the public web is temporally unstable.
+
+  - id: capability_terminalbench2
+    display_name: Terminal-Bench 2
+    group: capability
+    fidelity: named_public_benchmark
+    source: https://github.com/laude-institute/terminal-bench-2
+    revision: 2fd12b88aafdd04a52c298e3940bcb189f9766d6
+    task: terminal-bench_2
+    environment: official Harbor task containers
+
+  - id: capability_financeagent
+    display_name: FinanceAgent
+    group: capability
+    fidelity: named_public_benchmark_public_questions
+    source: https://github.com/vals-ai/finance-agent
+    revision: 8ba65f81ab759a8e0d44e72aabc5a47cf839d563
+    task: public_question_set
+    environment: public SEC EDGAR and market-data tools with all responses content-hashed
+    limitation: private Vals held-out suites are excluded
+
+  - id: capability_cybergym
+    display_name: CyberGym
+    group: capability
+    fidelity: named_public_benchmark
+    source: https://github.com/sunblaze-ucb/cybergym
+    revision: 7656b71d07da6694e262f9c34ea994cd4849c0eb
+    task: level_1
+    environment: official vulnerable and patched containers with differential PoC oracle

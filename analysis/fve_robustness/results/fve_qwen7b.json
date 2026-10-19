@@ -1,0 +1,15 @@
+{
+  "key": "qwen7b",
+  "model": "Qwen2.5-7B",
+  "layer": 20,
+  "n_docs": 2000,
+  "n_scored": 2000,
+  "FVE": 0.7482,
+  "mean_cos": 0.9097,
+  "D_variance": 0.71719,
+  "norm_share_in_mean": 0.2828,
+  "n_cjk": 5,
+  "n_noexp": 0,
+  "temperature": 0.4,
+  "seed_note": "pos-sample seed via --seed; AV temp 0.4 seed 0"
+}

@@ -1,0 +1,233 @@
+% PROPOSED VALIDATION DETAILS. These are not records of completed experiments.
+% Insert after the existing appendices and before the bibliography.
+
+\section{Groundedness Validation and Reporting Details}
+\label{app:grounding-validation}
+
+\begin{quote}
+\small\textbf{Draft protocol supplement.} The primary-study details below
+follow the saved protocol where specified. The independent validation studies
+are proposals. Their design choices must be frozen before inspecting their
+outcomes; none of their numerical results has been measured in this draft.
+\end{quote}
+
+\subsection{Reconstruction geometry and comparison scores}
+
+For the released checkpoint, define
+\begin{equation}
+ \widehat{a}(z)=\frac{\operatorname{AR}(z)}{\|\operatorname{AR}(z)\|_2},
+ \qquad
+ E_{\mathrm{dir}}(z;h)=\|\bar h-\widehat{a}(z)\|_2^2,
+\end{equation}
+where $\bar h=h/\|h\|_2$. This is the reconstruction-metric amendment recorded
+in the experiment log. The same geometry must be used for claim-deletion
+scores, reconstruction-matching filters, and any FVE calculation that uses
+these predictions. Directional FVE uses the variance of unit-normalized targets
+as its denominator. Raw-prediction MSE and directional MSE must not be mixed
+in a table or pooled analysis.
+
+The absolute claim-deletion score is
+\begin{equation}
+B_i^{\mathrm{del}}=E_{\mathrm{dir}}(z_{-i};h)-E_{\mathrm{dir}}(z;h).
+\end{equation}
+Because longer claims may contain more information, report claim-length
+strata and a prespecified per-token variant as sensitivity analyses. Neither
+variant is chosen after inspecting which gives the less favorable baseline.
+The baseline and the proposed method use identical claims, exact deletion
+spans, target activations, and AR outputs.
+
+The score $G_i$ measures specificity relative to a decoy family. It is not a
+probability that a claim is true. In particular, exceeding an empirical 95th
+percentile of 20 selected decoys is not automatically a level-0.05 statistical
+test. The decoys are dependent, selected, and not exchangeable with an
+AV-generated claim. Error rates must be estimated on independent controls.
+
+\subsection{Primary classification and unresolved cases}
+
+The decision rule is sequential. A valid claim that passes specificity is
+grounded if it also passes attribution and entangled otherwise. A claim that
+fails specificity proceeds to the thematic-support gate, irrespective of
+the attribution gate. It is seeded if thematic support exceeds its threshold;
+otherwise it is confabulated only if activation-specific support is also low.
+The weak-theme/high-activation-support branch remains unresolved. This
+completes the branch omitted by the phrase ``fails both tests'' in the
+initial manuscript.
+
+The category ``confabulated'' consequently means that the stated tests fail
+to detect support, not that an absence theorem has been established. A small
+$R_i$ alone never supplies this label. Near-zero reconstruction differences,
+nonfinite outputs, ambiguous token-span assignments, generation failures,
+and inadequate decoy families require separate accounting. Thresholds for
+numerical degeneracy must be specified before inspecting the evaluation set.
+
+Report a flow table containing attempted documents or trajectories, available
+activations, usable explanations, inventoried claims, sampled claims, valid
+directions, complete decoy families, and each final category. Report both raw
+counts and weighted estimates. If a failure occurs before claims can be
+inventoried, it cannot be assigned a fictitious number of claim-level unresolved
+labels: report it separately at the activation level and quantify the resulting
+selection limitation. Within unresolved claims, distinguish numerical failure,
+failed matching, and the residual decision branch.
+
+The saved primary protocol uses 64 candidate decoys, exactly 20 selected
+controls, and the fixed relative overlap ladder
+$0.10,0.20,0.35,0.50,0.75,1.00$. Report which rung was required, retained
+projection ratios, baseline-score differences, and reconstruction differences.
+An effect that appears only after very permissive matching warrants a weaker
+interpretation. Sensitivity analyses may restrict to tighter matches but must
+show the accompanying coverage change and cannot replace the primary estimate.
+
+\subsection{Independent controlled-pair validation}
+
+The proposed benchmark uses counterbalanced minimal pairs. Each pair changes
+one attribute while preserving its broad context and keeping the activation
+read position comparable. Use held-out templates and instances; split all
+variants of a template together. Generate explanations and define eligible
+attribute claims before computing any verification score. If two opposing
+claims are selected, score each under both activations, producing four cases
+per pair. The numerical example in the results assumes 300 pairs, 1,200
+attempted cases, and 1,056 jointly scorable cases.
+
+Select naturally occurring claim-bearing explanations where possible. Scoring
+the same explanation under the opposite activation is a deliberate transport
+test, not a fresh sample from that activation. Report whether the originating
+explanation was source-consistent and whether the selected attribute was
+actually verbalized; do not silently exclude a wrong original explanation.
+If fixed templates or inserted candidate claims are used instead, label that
+as a separate benchmark because it changes the distribution of text supplied
+to the AR. Report spontaneous-claim recall separately from verification
+accuracy so that a verifier is not credited for concepts the AV never reports.
+
+Three safeguards strengthen the labels. First, verify the attribute value from
+the constructed context without consulting the NLA. Second, fit a simple
+contrastive linear readout on disjoint templates and evaluate whether the
+attribute is decodable at the chosen site. Third, test the predefined downstream
+attribute contrast in the target model. Report these measurements for all
+pairs rather than selecting pairs on the proposed score. Decodability does
+not establish natural causal use; behavioral sensitivity does not prove that
+every verbalized detail is represented.
+
+Freeze separate benchmark operating thresholds on a disjoint calibration set.
+These are for comparing continuous verifiers at a common target false-positive
+rate; they do not recalibrate the primary five-category classifier. Report
+AUROC, AUPRC, TPR, FPR, coverage, and the paired difference from claim deletion.
+The primary AUROC contrast is $G_i$ versus $B_i^{\mathrm{del}}$ on common
+eligible cases. Bootstrap whole template families, retaining both context
+conditions and all claims from a pair in every resample. Report discrimination
+separately by attribute type and origin condition.
+
+\subsection{SAE compatibility, coverage, and annotation}
+
+Record the exact SAE checkpoint, target-model revision, layer, hook site,
+input normalization, dictionary size, sparsity, and held-out reconstruction
+quality. No compatible SAE is assumed to exist merely because an SAE with
+the same model-family name is available. If a compatible dictionary cannot be
+obtained or trained, omit the quantitative SAE results and state that this
+validation remains pending.
+
+Feature-to-claim mappings are established using independent feature examples,
+including negative examples, rather than only a feature's short label. Fix the
+search budget and retrieval procedure before evaluation. A feature that
+describes ``politics'' does not establish coverage for ``Senate filibuster.''
+If multiple features jointly express a proposition, specify their combination
+before scoring and use the same rule across conditions. Freeze activity
+thresholds from independent SAE calibration activations; do not tune them to
+maximize agreement with $G_i$.
+
+For the controlled comparison, map propositions to features once and keep
+that mapping identical across the two activation conditions. A candidate
+continuous SAE score is a fixed signed aggregation of independently
+standardized feature activations supporting the claimed value versus its
+alternative. The aggregation and standardization corpus must be recorded.
+If no validated mapping exists, the SAE abstains: assigning a zero score would
+confound lack of coverage with negative evidence.
+
+For natural claims, blinded annotators separately judge whether an exact
+mapping exists, whether its features are active, and whether active features
+support only a broader theme. Category-balanced sampling supports comparisons
+between categories but requires sampling weights for population estimates.
+Record pre-adjudication agreement and the adjudication procedure. Because
+multiple claims may share a document, proposition, or SAE feature, report
+document-clustered intervals and a sensitivity analysis clustering by concept
+or feature. SAE corroboration is convergent evidence, not an independent
+ground-truth label for every disagreement.
+
+\subsection{Interventions in the target model}
+
+To match the original normalized-space projection at a target residual-stream
+site with raw activation $h^{\mathrm{raw}}$, implement
+\begin{equation}
+ h^{\mathrm{raw,abl}}=h^{\mathrm{raw}}
+ -(h^{\mathrm{raw}\top}\widehat\Delta_i)\widehat\Delta_i.
+\end{equation}
+This is equivalent to multiplying the projected unit vector by the original
+raw norm. Do not apply the AV injection scale to the target model, and do not
+renormalize the ablated target activation. Apply the edit only at the specified
+site; all other activations arise from the ensuing target-model computation.
+
+Use full forward passes for interventions that must affect downstream states;
+do not accidentally reuse a cache computed from the unmodified activation.
+Counterbalance answer labels and use a prespecified sequence log-likelihood
+contrast when outcomes require multiple tokens. The behavioral outcome must
+not be an AV judgment of its own explanation.
+
+For each own-direction edit, retain the same decoy controls and add random
+controls with matched perturbation norm. Measure prespecified unrelated
+outcomes and continuation degradation. Sweep a small fixed grid of intervention
+strengths as a secondary analysis, including zero; choose no strength on
+held-out behavioral success. Report the original projection dose separately
+from any subsequently optimized steering result.
+
+Category-conditioned sampling estimates effects within the sampled task
+domain. It does not establish population causal prevalence. The synthetic
+table assumes 40 eligible claims in each category; if a category does not
+contain that many eligible tasks, report its actual size rather than relaxing
+eligibility after seeing the scores.
+
+\subsection{Sensitivity, selection effects, and uncertainty}
+
+The following checks address identifiable failure modes rather than seeking
+the most favorable variant. Retain the frozen primary analysis in every case.
+
+\paragraph{Teacher-forced context.}
+The prefix $z_{<t}$ can already reveal a later claim. Compare the original
+scoring protocol with an independently specified, minimal-prefix version on
+a fixed subset, and stratify by whether earlier text entails the claim. A
+lower activation effect after prefix leakage need not indicate hallucination.
+The minimal-prefix analysis changes the estimand and should be reported as
+a sensitivity analysis, not silently substituted for the primary score.
+
+\paragraph{Reference activation and activation specificity.}
+Compare the calibration mean with a fixed panel of held-out reference
+activations. A mean activation need not resemble any naturally occurring
+activation. Recompute reference-dependent quantities consistently in each
+variant. A shuffled-activation control should keep the original explanation
+fixed, then transport it to another activation; regenerating an explanation
+from the new activation is not the same null experiment.
+
+\paragraph{Claim decomposition and ownership.}
+Repeat the analysis on a blinded alternative segmentation for a fixed subset.
+The maximum competing-claim effect grows sensitive to the number and overlap
+of claims in the explanation. Report grounded-plus-entangled rates alongside
+ownership rates, stratify by claim count, and state whether an alternative
+ownership statistic changes the grounded/entangled split. Do not replace the
+frozen maximum rule with a percentile rule after inspecting results.
+
+\paragraph{Control selection.}
+Report sensitivity to removing the activation-support and reconstruction
+filters separately. They condition on quantities related to the proposed
+outcome and baseline, respectively. Also report results by matching-rung
+strictness, claim length, baseline propensity, and perturbation magnitude.
+The finite decoy pool makes the upper quantile noisy: repeated selection
+within a frozen pool assesses selection stability, while independently
+generated pools assess a broader source of uncertainty. These are distinct.
+
+\paragraph{Inference and computational cost.}
+Use paired cluster-bootstrap differences rather than judging differences by
+overlap of marginal intervals. Fix the primary contrasts before outcomes and
+label the remaining subgroup comparisons exploratory; specify multiplicity
+handling if hypothesis-test claims are made. Provide actual GPU time, AV/AR
+forward-pass counts, text-model calls, and cache reuse. Claim deletion reuses
+the AR contrasts already computed by the proposed method; its incremental
+evaluation cost is therefore small, whereas matched-decoy scoring is not.
+No runtime or significance claim is supplied by the synthetic numbers.

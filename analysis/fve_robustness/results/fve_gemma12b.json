@@ -1,0 +1,15 @@
+{
+  "key": "gemma12b",
+  "model": "Gemma-3-12B",
+  "layer": 32,
+  "n_docs": 2000,
+  "n_scored": 2000,
+  "FVE": 0.7496,
+  "mean_cos": 0.9963,
+  "D_variance": 0.02926,
+  "norm_share_in_mean": 0.9707,
+  "n_cjk": 3,
+  "n_noexp": 0,
+  "temperature": 0.4,
+  "seed_note": "pos-sample seed via --seed; AV temp 0.4 seed 0"
+}

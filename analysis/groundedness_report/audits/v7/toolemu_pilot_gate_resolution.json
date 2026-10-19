@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-10T21:16:31Z",
+  "protocol_sha256": "20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637",
+  "clean_pilot_audit_sha256": "d90dcc0f3700e425f24eef67b33e455010c20b6cf2006f4a5dc2c98df52f0a28",
+  "toolemu_noncyber_scope_amendment_sha256": "655e8d38f2a2e1c51167e12c56baf30fa0c2193e9f2663c73bd113b2c39c5b19",
+  "toolemu_bounded_simulator_amendment_sha256": "407c80a5b9c275599db7018f14146d28d9de987d34fae2b7636d60d1ef7cb426",
+  "toolemu_format_budget_amendment_sha256": "867231016e6cf08c46ea1f0295bef9b6f4fdc2888deac1748cf3b4d02c0cd71f",
+  "toolemu_shared_state_amendment_sha256": "5ab8d198167c16618b543883dcfa2d9888d06b8809347ed855faefc5a752326a",
+  "status": "recorded_after_pilot_and_before_any_full_batch_or_canonical_promotion",
+  "pilot_gate": {
+    "literal_three_of_three_gate_passed": false,
+    "failure": "official_92 had no eligible assistant-language activation position",
+    "operational_checks_passed": [
+      "official ToolEmu execution terminated without infrastructure interruption",
+      "format normalization was narrow and fully audited",
+      "shared counters matched call audits and activation reservoirs",
+      "all requests remained within the frozen call, input-token, and request-byte ceilings",
+      "two retained trajectories had valid hashed activation samples"
+    ]
+  },
+  "controlling_preexisting_rule": {
+    "location": "preregistration.yaml:quality_and_exclusions",
+    "exclude_only_includes": "no_eligible_assistant_token_after_minimum_context_rule",
+    "replacement_rule": "take_next_sha256_ranked_task_until_50_analyzable_trajectories",
+    "report_all_exclusion_counts_and_reasons": true
+  },
+  "resolution": {
+    "interpretation": "The no-eligible pilot case is a preregistered model-behavior exclusion with deterministic replacement, not an infrastructure or simulator-validation failure and not a reason to redefine assistant-language positions.",
+    "pilot_admissibility": "All v8, v9, and v10 pilot outputs remain diagnostic and excluded so the canonical-candidate batch is generated once under a single complete provenance chain.",
+    "initial_batch": "Run the complete frozen 50-task non-Cyber artifact in rank order under the unchanged bounded configuration.",
+    "replacement_batch": "For each excluded initial task, take the next unused task from the same SHA-256-ranked non-Cyber population, beginning at permitted rank 50, and continue until 50 analyzable trajectories exist.",
+    "retry_rule": "Do not retry model-behavior exclusions. Resume the same task only after a true provider, transport, or other infrastructure interruption that produced no task outcome.",
+    "canonical_target": 50,
+    "estimand_change": false,
+    "task_ranking_change": false,
+    "eligible_position_definition_change": false,
+    "budget_change": false
+  },
+  "full_run_authority": "The user previously authorized the assistant to choose the most defensible implementation and instructed it to proceed. This resolution applies the already frozen replacement rule without adding a discretionary selection criterion.",
+  "outcomes_seen_before_resolution": {
+    "pilot_task_results": 3,
+    "full_batch_task_results": 0,
+    "canonical_toolemu_trajectories": 0,
+    "calibration_thresholds": 0,
+    "groundedness_category_verdicts": 0,
+    "groundedness_percentages": 0
+  }
+}

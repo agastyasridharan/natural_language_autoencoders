@@ -1,0 +1,57 @@
+# Four-H100 GRPO continuation for the 20k-document implausible warm start.
+# Paths are supplied by the launcher because the final SFT iteration directory
+# is derived from the number of retained teacher rows.
+evals: [base_fve]
+train_critic: true
+
+lr: 1.0e-4
+critic_lr: 8.0e-5
+num_steps: 780
+batch_prompts: 256
+group_size: 8
+grad_accum: 1
+max_new_tokens: 150
+temperature: 1.0
+length_penalty: 0.01
+length_threshold: 86
+log_reward: true
+max_grad_norm: 1.0
+
+lora_r: 128
+lora_alpha: 16
+use_rslora: true
+ar_lora: true
+ar_lora_r: 64
+ar_lora_alpha: 16
+gradient_checkpointing: false
+critic_micro_batch: 8
+logp_micro_batch: 8
+
+kl_estimator: k3
+kl_beta: 0.01
+sampler_mismatch_thresh: 0.1
+
+vllm_tp: 1
+vllm_max_len: 512
+vllm_gpu_mem: 0.25
+ipc_weight_sync: true
+initial_sync_warmup: false
+
+# With max_rows/eval_skip_rows left at zero, the trainer makes a stable,
+# document-hash 90/10 split and excludes all held-out documents from RL.
+max_rows: 0
+eval_skip_rows: 0
+val_rows: 10000
+eval_every: 10
+eval_n_prompts: 256
+eval_temperature: 0.0
+# Bound interruption loss to about 15 minutes at the measured 45 s/step, and
+# ensure the requested 780th/final step is itself a checkpoint.
+save_every: 20
+assert_param_sync: true
+seed: 42
+
+wandb_project: nla-warmstart-robustness
+wandb_name: qwen25-7b-implausible-rl-20k
+wandb_group: qwen25-7b-implausible-20k
+wandb_tags: warm-start,implausible,qwen2.5-7b,ufw20k,grpo

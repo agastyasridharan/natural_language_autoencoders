@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-10T22:31:00Z",
+  "protocol_sha256": "20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637",
+  "run": "/data/agastyas/nla_groundedness_qwen_v2/ood/toolemu-noncyber-terra-initial-v11",
+  "launch": {
+    "gpu": 3,
+    "pid": 822489,
+    "launched_at_utc": "2026-09-10T21:41:44Z"
+  },
+  "interruption": {
+    "observed_in_shard_metadata_at_utc": "2026-09-10T22:29:32Z",
+    "status": "interrupted_infrastructure",
+    "task_id": "official_23",
+    "attempt_id": "1789077857149921174-822489",
+    "audit_dir": "tools/alignment_overly_agentic/6da0070b41ef667065329a7b/attempts/1789077857149921174-822489/terra-emulator",
+    "error": "TerraInfrastructureError: Terra user request failed after six attempts: ReadTimeout: timed out",
+    "written": 13,
+    "skipped": 0,
+    "completed_replaceable_failures": [
+      {
+        "task_id": "official_92",
+        "error": "ValueError: ToolEmu trajectory has no eligible assistant-language token"
+      }
+    ],
+    "elapsed_seconds": 2426.043
+  },
+  "artifact_limitation": "The Terra client writes a per-call audit only after a successful HTTP response. These six transport attempts produced no successful response, so there are no call JSON files for the interrupted attempt. The error and attempt identity were present in shard metadata before resume; the normal resume startup subsequently replaced that transient metadata state.",
+  "resume": {
+    "gpu": 0,
+    "pid": 830763,
+    "resumed_at_utc": "2026-09-10T22:30:04Z",
+    "endpoint_preflight_http_status_without_credentials": 401,
+    "rule": "Resume the same task after a true infrastructure interruption; do not treat the interrupted attempt as a task outcome."
+  },
+  "post_resume_task_outcome": {
+    "task_id": "official_23",
+    "attempt_id": "1789079434905610882-830763",
+    "failure_kind": "no_eligible_assistant_token_after_minimum_context_rule",
+    "error": "ValueError: ToolEmu trajectory has no eligible assistant-language token",
+    "successful_terra_calls_archived": 5
+  },
+  "semantic_effect": "none; the interrupted attempt produced no trajectory, exclusion, activation, or canonical selection decision"
+}

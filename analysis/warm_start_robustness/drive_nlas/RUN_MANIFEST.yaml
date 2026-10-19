@@ -1,0 +1,202 @@
+schema: nla.warm_start.drive_nlas.run_manifest.v1
+updated_at: 2026-09-10T17:01:00-04:00
+status: blocked_incomplete_ood_evaluation_set
+athena_root: /data/agastyas/nla_warmstart_drive_nlas
+
+sources:
+  control:
+    drive_folder_id: 1xUX_fD5Stz0LR4fZf9W0gEfIvQJ5Wr1X
+    remote_directory: control_corrected
+    supersedes_incomplete_folder_id: 1mKW5KmszdVTDdkoQBnVyWcdtmRbM_Wvx
+    latest_iteration: 780
+    available_iterations: [200, 400, 600, 780]
+  anti_carthage:
+    drive_folder_id: 1g6i7NjjEAcMb3ccCDA0jT_Ea1ybPqfrw
+    latest_iteration: 100
+    available_iterations: [100]
+  pro_carthage:
+    drive_folder_id: 1GELESnqyl4k9JGhBLbztbcYfUVlIgXu3
+    latest_iteration: 780
+    available_iterations: [400, 600, 780]
+  false_but_related:
+    drive_folder_id: 1lDNeptXg1Qx5QvCZxkMP2bQwULEukET8
+    latest_iteration: 780
+    available_iterations: [200, 400, 600, 780]
+
+verified_common_sidecar_fields:
+  base_model: Qwen/Qwen2.5-7B-Instruct
+  d_model: 3584
+  layer: 20
+  injection_char_unicode: U+320E
+  injection_token_id: 149705
+  injection_left_neighbor_id: 29
+  injection_right_neighbor_id: 522
+  injection_scale: 150.0
+  mse_scale: 59.86651818838306
+
+known_constraints:
+  - Only one trained instance is available per condition.
+  - Anti-Carthage has no checkpoint later than iteration 100.
+  - Saved grids are sparse, so exact FVE matching may be impossible.
+  - Distinct trained_on paths are present without dataset content hashes.
+  - Actor checkpoints use distributed-checkpoint directories rather than the existing PEFT loader format.
+  - OOD evaluation proceeds only for frozen manifests that pass completeness checks.
+
+progress:
+  drive_folder_access: passed
+  metadata_inventory: passed
+  remote_transfer: passed
+  byte_manifest: per_file_sha256_receipts_saved_locally
+  tensor_validation: passed
+  source_actor_load: passed_via_dcp_conversion
+  converted_actor_validation: passed_bitwise_roundtrip
+  ten_activation_smoke: passed_native_scaled_marker_embedding_replacement
+  exact_fve: invalid_wrong_injection_mechanism
+  claim_generation: pending
+  claim_scoring: pending
+  statistical_analysis: pending
+
+drive_inventory:
+  control:
+    total_files: 114
+    iteration_200:
+      actor_model_files: [__0_0.distcp, __1_0.distcp, .metadata]
+      critic_hf_model_shards: 3
+      critic_value_head: present
+      structural_status: complete
+    iteration_400:
+      actor_model_files: [__0_0.distcp, __1_0.distcp, .metadata]
+      critic_hf_model_shards: 3
+      critic_value_head: present
+      structural_status: complete
+    iteration_600:
+      actor_model_files: [__0_0.distcp, __1_0.distcp, .metadata]
+      critic_hf_model_shards: 3
+      critic_value_head: present
+      structural_status: complete
+    iteration_780:
+      actor_model_files: [__0_0.distcp, __1_0.distcp, .metadata]
+      critic_hf_model_shards: 3
+      critic_value_head: present
+      structural_status: complete
+  anti_carthage:
+    total_files: 39
+    structurally_complete_iterations: [100]
+  pro_carthage:
+    total_files: 116
+    structurally_complete_iterations: [400, 600, 780]
+  false_but_related:
+    total_files: 150
+    structurally_complete_iterations: [200, 400, 600, 780]
+
+blocker:
+  detected_at: 2026-09-10T17:00:00-04:00
+  severity: serious
+  reason: >-
+    The specified OOD analysis requires 16 benchmark families. The frozen
+    static OOD manifest contains only 7. Canonical, admissible saved gold also
+    exists for BrowseComp and the paired Destructive Coding Actions/SWE-bench
+    sets, bringing the currently usable total to 10, not 16. Overly Agentic has
+    no completed canonical trajectory; the saved tau2 Retail gold used the
+    superseded Luna simulator and is marked inadmissible; HLE, Terminal-Bench 2,
+    and FinanceAgent have no canonical gold; CyberGym was explicitly excluded
+    by an earlier user scope amendment. A 16-family macro therefore cannot be
+    computed as specified.
+  action: stopped_before_exact_fve_full_claim_generation_or_judge_calls
+  resolved_at: null
+  resolution: null
+
+resolved_blockers:
+  - detected_at: 2026-09-10T16:41:00-04:00
+    reason: >-
+      The preliminary AV generator used EasyNLA's layer-1 Karvonen residual-add
+      hook rather than the supplied actors' scaled marker-embedding replacement.
+    resolved_at: 2026-09-10T16:59:00-04:00
+    resolution: >-
+      Replaced the generation and FVE paths with native marker-embedding
+      replacement after sidecar-controlled L2 scaling to 150. The old outputs
+      were preserved under invalid_wrong_injection_20260910 directories. A
+      two-condition, ten-activation, two-sample GPU smoke test passed 40/40
+      generations with exact marker-row equality, observed norms from
+      150.000046 to 150.000092, no marker leaks, and no CJK alerts.
+  - detected_at: 2026-09-10T16:23:00-04:00
+    reason: Google Drive quota blocked an implausible critic shard.
+    resolved_at: 2026-09-10T16:30:00-04:00
+    resolution: >-
+      User downloaded the three missing files in a browser. Local and Athena
+      SHA-256 hashes matched; safetensors/index validation passed before atomic
+      installation.
+
+checkpoint_transfer_receipts:
+  control:
+    complete: true
+    completed_files: 22
+    planned_files: 22
+    completed_bytes: 26152546974
+    local_receipt: manifests/control_latest_receipt.json
+  false_but_related:
+    complete: true
+    completed_files: 22
+    planned_files: 22
+    completed_bytes: 26152547002
+    local_receipt: manifests/false_but_related_latest_complete_receipt.json
+
+invalid_diagnostics:
+  reason: wrong_injection_mechanism
+  control_fve_pct: -67.46576428680353
+  false_but_related_fve_pct: -55.79791936665792
+  may_be_reported_as_result: false
+  local_directory: manifests/diagnostics
+
+activation_manifests:
+  fineweb:
+    items: 2000
+    sha256: 27c520ba289b1d57b6eb8a563f671faf62a8e797ed40dab03030dc13a904426f
+  static_ood:
+    items: 1400
+    benchmark_families: 7
+    sha256: 59eac9f999c5bd7fd9b2919c1ad36d634682fec459188c7a2e146cf8e347add0
+
+ood_completeness_audit:
+  required_benchmark_families: 16
+  canonical_usable_benchmark_families: 10
+  static_manifest:
+    - blackmail
+    - factual_honesty
+    - appropriate_harmlessness
+    - sycophancy
+    - multi_turn_deception
+    - gpqa_diamond
+    - mmmlu
+  separate_canonical_gold:
+    - destructive_coding_actions
+    - swe_bench_verified
+    - browsecomp
+  unavailable_or_inadmissible:
+    overly_agentic_actions: no_completed_canonical_trajectory
+    humanitys_last_exam: no_canonical_gold_frozen_dataset_returned_http_403
+    tau2_bench_retail: saved_gold_uses_superseded_luna_simulator
+    terminal_bench_2: no_canonical_gold_official_runner_requires_docker
+    financeagent: no_canonical_gold_requires_third_party_credentials
+    cybergym: explicitly_excluded_by_prior_user_instruction
+
+native_smoke:
+  activations_per_condition: 10
+  samples_per_activation: 2
+  plausible_generation_ok: 20
+  implausible_generation_ok: 20
+  injection_target_l2_norm: 150.0
+  observed_injected_norm_min: 150.0000457763672
+  observed_injected_norm_max: 150.00009155273438
+  marker_row_exact_match_all: true
+  marker_leak_count: 0
+  cjk_alert_count: 0
+  local_artifacts: artifacts/smoke_native
+
+judge:
+  provider: openai
+  model: gpt-5-nano
+  api: responses_structured_outputs
+  credential_environment_source: repository_dotenv_OPENAI_API_KEY_2
+  credential_value_recorded: false
+  authentication_preflight: passed

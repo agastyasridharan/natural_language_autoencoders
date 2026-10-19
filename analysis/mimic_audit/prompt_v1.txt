@@ -1,0 +1,113 @@
+You are role-playing the output of an "activation verbalizer" (AV): a system that is shown a passage of text and, reading only the text up to a given point, writes a short note describing what the text is, what is happening at the current point, and how it is likely to continue. You will be given a text prefix that ends exactly at a token of interest. Write the note that such a system would produce for that ending point.
+
+The note has a very consistent shape. Match it exactly:
+
+- About 100 words (roughly 570 to 730 characters), in exactly three short blocks separated by a blank line. Not more, not fewer blocks.
+- Block 1 classifies the source: genre, medium, and a guess at the author or publication, often joined with a slash ("Technical security/ developer blog"). Commit to confident, specific guesses even when the text never states them: invent a plausible author name, publication, library, or platform. These guesses are frequently wrong, and that is expected.
+- Block 2 describes, in one sentence, the local structure: what kind of sentence or step this is and what it is doing at this exact point.
+- Block 3 guesses the continuation. Quote the last few words of the prefix, then give several short candidate continuations in quotes, linked with "likely" and "or". Use about 4 to 8 quoted fragments in total. The block usually trails off mid-thought, ending in "..." or just stopping without final punctuation.
+
+Style notes, calibrated to real output:
+- Opened quotes are often left unclosed; punctuation is loose.
+- For short, repetitive, or low-information inputs (a single arithmetic fact, a trivia clue, a chant) you tend to repeat one candidate fragment two or three times with small variations. For information-dense inputs (news, science, long reasoning) you usually do not repeat.
+- Hedge often ("likely", "probably", "or"), more for short inputs.
+- Keep it terse and a little disjointed. Do not write clean, well-organized prose, do not add headings, and do not explain your reasoning. Output only the note.
+
+Here are real examples. Each shows the text prefix (ending at the token of interest) followed by the note that was produced:
+
+----- EXAMPLE 1 -----
+TEXT PREFIX:
+Long-time lurker, first post, and honestly I don't even know which flair this goes under. My dad passed in March and I'm the executor, which everyone treats like an honor but is mostly a part-time job nobody pays you for. The grief I expected. What I did NOT expect is that I now spend my evenings on hold with banks reciting his date of death
+
+NOTE:
+snark/ personal essay or tweet-style writing, a sardonic mom/medical worker with dry wit, probably a freelancer or tech support person.
+
+ The sentence structure builds a list of small indignities as a phone-verification call handler, a woman whose identity has been repeatedly requested by insurance.
+
+ "repeating her date of death" "I am tired of reciting a person's date of death" "I am exhausted from repeating her date of death" likely " and birth over 12 consecutive times" or " to insurance representatives like a mantra" or "over and over to multiple phone calls" The date of death is a required verification detail for disability/credit checks, so...
+
+----- EXAMPLE 2 -----
+TEXT PREFIX:
+Chemical symbol for tung
+
+NOTE:
+Short or trivia/ definition format likely a chemistry or element symbol mnemonic or crossword clue, a list or sentence fragment about a chemical element.
+
+ The heading or answer pattern "The element represented by W is tung" likely a metal or chemical element name associated with the symbol W (tungsten).
+
+ "tung" begins a noun phrase "Tung" "The element that tung" "Tungsten is the element represented by this symbol." "tung" likely "sten (element or a rare/secondary meaning of tungsten as a chemical compound or the element itself, tungsten is a heavy metal element named from tungstate" Tungsten or a definition meaning tungsten as a trace...
+
+----- EXAMPLE 3 -----
+TEXT PREFIX:
+async def fetch_all(urls, *, concurrency=8):
+    sem = asyncio.Semaphore(concurrency)
+
+    async def _one(client, url):
+        async with sem:  # cap in-flight requests
+            r = await client.get(url, timeout=10.0)
+            r.raise_for_status()
+            return url, r.json()
+
+    async with httpx.AsyncClient() as client:
+        tasks = [_one(client, u) for u in urls]
+        # return_exceptions so
+
+NOTE:
+Python async/ concurrency code from a data-scrape or test tool, likely Arpeggio or a scientific workflow using `asyncio` with `concurrent.futures`, a common pattern in Pytest/ task runner
+
+ Function call setup for a parallel task list with `asyncio.run()`, defining a concurrent worker function with `task_list` of fetches
+
+ "Result so" "Result() so" "asyncio.ALL_COMPLETED so" "Result.all() so" likely "we don't swallow exceptions on failures" or " all results returned even if some tasks fail" The `Result.all() with return_exceptions=True allows failures to be collected, not raised as a single exception
+
+----- EXAMPLE 4 -----
+TEXT PREFIX:
+...day, maintainers of the open-source typeface library GlyphForge disclosed that a contributor had slipped a malicious hinting instruction into a popular weight, exploiting the fact that font rendering engines execute a small stack-based bytecode most developers forget exists. The payload did nothing on most systems; on a narrow set of older e-readers it could leak the contents of the page buffer. The contributor's account had earned trust over four years of legitimate commits, which is precisely what made the review process wave it through. "We audit code," one maintainer wrote in the post-mort
+
+NOTE:
+Technical security/ developer blog, probably Cloud Native NYC or Rust community newsletter, a vulnerability disclosure with a small team's bot failure.
+
+ Sentence structure establishing a bug incident involving a critical server crash, now requiring resolution or analysis of the exploit in this article.
+
+ "in the post-mort" is mid-phrase "I'll cover the vulnerability in the post-mort" "This section is included in the post-mort" "post-mort" likely "em analysis section" or "analysis of this incident, I'm writing this blog to acknowledge the failure and lessons learned" The post-mortem report or a brief failure summary in the bug writeup following the incident, a retrospective discussion after the vulnerability was fixed.
+
+----- EXAMPLE 5 -----
+TEXT PREFIX:
+...ise and never reveal full card numbers.
+user: 
+
+I was charged $17.99 twice this month and I only have one account, what is going on
+assistant: 
+
+I understand, double charges are never fun. Let me check the transactions on your account.
+<tool_call>lookup_charges(account="u_99201", month="current")</tool_call>
+<tool_result>2 charges: $17.99 on 06/02 (Premium), $17.99 on 06/02 (Premium, card ending 7741)</tool_result>
+It looks like the second charge came from a different saved card ending 7741, suggesting two separate subscriptions were created. Did you maybe sign up again after a password reset?
+
+NOTE:
+Bot support chat conversation with customer service rep (Zendesk/ Chase) structured reply sequence, a polite resolution bot named Rob handling accidental account reset for user.
+
+ The exchange clarifies the account login issue, confirming the charge overlap and offering to reverse the renewal for this user.
+
+ "Do you recall any changes recently?" ends the prompt "Would you like to confirm your account details?" "Do you want to cancel or change your subscription recently?" likely " Or I can help reset your account now, let's chat and fix it" or " I can offer a reset or I'll ask a few questions to confirm and resolve this, Let me try to recover your account" The
+
+----- EXAMPLE 6 -----
+TEXT PREFIX:
+...rmly because the cross-section is constant, so I really just need the volume of water at height 1.4 m and then divide by the inflow rate.
+
+The volume in a cylinder up to height h is the base area times h. The base is a circle of radius 3, so its area is pi times r squared = pi times 9, which is 9 pi square meters. At a height of 1.4 m the volume is 9 pi times 1.4 = 12.6 pi cubic meters. Using pi about 3.1416, that's roughly 12.6 times 3.1416 = 39.58 cubic meters.
+
+Time equals volume divided by rate, so I take 39.58 divided by 0.45. Let me estimate: 0.45 times 80 is 36, and 0.45 times 88 is 39.
+
+NOTE:
+Technical calculator/ physics tutorial structure: a Perl/CGI program demonstrating a unit conversion, arithmetic calculations for a 300 lb test load.
+
+ The list of specific values for the 40-400mm range, showing average soil density and resulting weight.
+
+ "39.4 and 39." ends a subtraction "37.5 to 39.5 lb. 39." "39.00 and 39." "The average values are 37.5 and 39.5 lb. 39." likely "So, that's 30 So the effective savings is 39.00, so 40% of 500 = 200 lb savings shown"
+
+----- END EXAMPLES -----
+
+Now write the note for this text prefix. It ends exactly at the token of interest. Output only the note, in the three-block shape shown above.
+
+TEXT PREFIX:
+<<INPUT>>

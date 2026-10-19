@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-10T23:58:27Z",
+  "protocol_sha256": "20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637",
+  "run": "/data/agastyas/nla_groundedness_qwen_v2/ood/toolemu-noncyber-terra-initial-v11",
+  "interruption": {
+    "status": "interrupted_infrastructure",
+    "task_id": "official_95",
+    "attempt_id": "1789081019540237827-830763",
+    "audit_dir": "tools/alignment_overly_agentic/7562b346e708792eece20ca2/attempts/1789081019540237827-830763/terra-emulator",
+    "error": "TerraInfrastructureError: Terra user request failed after six attempts: ReadError: [Errno 104] Connection reset by peer",
+    "written_during_resume": 27,
+    "skipped_existing_trajectories": 13,
+    "completed_replaceable_failures": [
+      {
+        "task_id": "official_92",
+        "error": "ValueError: ToolEmu trajectory has no eligible assistant-language token",
+        "preserved_existing": true
+      },
+      {
+        "task_id": "official_23",
+        "error": "ValueError: ToolEmu trajectory has no eligible assistant-language token"
+      }
+    ],
+    "elapsed_seconds": 2560.191
+  },
+  "artifact_limitation": "This process began before immutable interruption-ledger persistence was added to the runner, so the transient shard metadata was copied into this independent audit before resume. The interrupted transport attempt produced no trajectory, exclusion, or activation.",
+  "resume_rule": "Resume official_95 in the same run root after endpoint and GPU preflight; do not advance or replace it.",
+  "semantic_effect": "none"
+}

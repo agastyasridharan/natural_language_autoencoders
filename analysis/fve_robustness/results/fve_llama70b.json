@@ -1,0 +1,15 @@
+{
+  "key": "llama70b",
+  "model": "Llama-3.3-70B",
+  "layer": 53,
+  "n_docs": 2000,
+  "n_scored": 2000,
+  "FVE": 0.7883,
+  "mean_cos": 0.9029,
+  "D_variance": 0.91717,
+  "norm_share_in_mean": 0.0828,
+  "n_cjk": 0,
+  "n_noexp": 0,
+  "temperature": 0.4,
+  "seed_note": "pos-sample seed via --seed; AV temp 0.4 seed 0"
+}

@@ -1,0 +1,64 @@
+schema_version: nla.warm_start.fve_matching_protocol.v1
+status: frozen_before_gpu_evaluation
+
+checkpoint_state_mapping:
+  trainer_step_indexing: zero_based
+  eval_timing: after_actor_and_critic_update_at_step_N
+  save_timing: after_actor_and_critic_update_at_step_N_minus_1
+  logged_eval_step_N_maps_to_transaction_step: N_plus_1
+  transaction_step_N_last_update_index: N_minus_1
+  prohibition: never_assign_logged_eval_at_N_to_iter_N
+
+exact_evaluation:
+  heldout_prompts: 256
+  heldout_selection: first_256_rows_in_crc32_document_validation_bucket
+  validation_rows_target: 10000
+  generation_temperature: 0.0
+  generation_top_p: 1.0
+  generation_top_k: -1
+  generation_max_new_tokens: 150
+  generation_group_size: 1
+  vllm_tensor_parallel_size: 1
+  vllm_gpu_memory_utilization: 0.25
+  vllm_enforce_eager: true
+  vllm_prefix_caching: false
+  injection: exact_EasyNLA_vllm_lens_Karvonen_layer_1_norm_matched_addition
+  injection_audit: patched_per_request_steer_log_plus_global_apply_counter
+  critic: contemporaneous_historical_critic_from_same_immutable_transaction
+  critic_extraction: suffix_anchored_last_real_token
+  critic_max_tokens: 1024
+  critic_batch_size: 32
+  fve_denominator: raw_variance_of_normalized_fixed_heldout_activations
+  failure_reward: -2.0
+  primary_fve_complete_cases: critic_rewards_strictly_greater_than_-2.0
+  checkpoint_file_hashes_required_for_selection: true
+
+selector:
+  final_step: 780
+  checkpoint_interval: 20
+  held_condition: lower_exact_final_FVE_condition_at_step_780
+  candidate_condition: higher_exact_final_FVE_condition
+  candidate_steps: {start: 20, stop_inclusive: 780, stride: 20}
+  objective: minimize_absolute_FVE_difference_in_percentage_points
+  tie_break: later_checkpoint_step
+  incomplete_candidate_grid: fail_closed
+  exact_final_tie: fail_closed_as_lower_higher_is_undefined
+
+claim_analysis_sets:
+  activation_key_includes_checkpoint_id: false
+  must_generate_and_score_separately: true
+  sets:
+    - analysis_set_id: final_vs_final
+      members:
+        plausible: {condition: plausible, transaction_step: 780}
+        implausible: {condition: implausible, transaction_step: 780}
+    - analysis_set_id: fve_matched
+      members: populated_by_frozen_selector
+  required_checkpoint_metadata:
+    - checkpoint_id
+    - transaction_step
+    - transaction_fingerprint
+    - actor_adapter_sha256
+    - base_checkpoint_tree_sha256
+    - merged_av_checkpoint_tree_sha256
+    - exact_fve_result_payload_sha256

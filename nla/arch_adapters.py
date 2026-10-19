@@ -84,25 +84,44 @@ def resolve_text_model(model: Any) -> Any:
 def resolve_decoder_layers(model: Any) -> torch.nn.ModuleList:
     """Find the decoder layers ModuleList, unwrapping multimodal wrappers first.
 
-    After resolve_text_model (always returns CausalLM-shaped):
-      Llama/Qwen/Mistral/Gemma: model.model.layers
-      GPT-2/Falcon: model.transformer.h
+    Covers, in order:
+      Llama/Qwen/Mistral/Gemma3ForCausalLM:        model.model.layers
+      Gemma3ForConditionalGeneration (multimodal): model.model.language_model.layers
+        (current transformers nests the text stack two levels deep: the wrapper's
+         .model is a Gemma3Model whose .language_model is the Gemma3TextModel —
+         resolve_text_model's one-level .language_model unwrap does not reach it)
+      bare TextModel:                              model.layers
+      GPT-2/Falcon:                                model.transformer.h
     """
     model = resolve_text_model(model)
-    if hasattr(model, "model"):
-        layers = model.model.layers
-    elif hasattr(model, "transformer"):
-        layers = model.transformer.h
-    else:
-        raise AssertionError(
-            f"{type(model).__name__} has neither .model nor .transformer — "
-            f"extend arch_adapters.resolve_decoder_layers for this architecture"
-        )
-    assert isinstance(layers, torch.nn.ModuleList), (
-        f"resolved {type(layers).__name__}, expected nn.ModuleList. "
-        f"Module path is wrong for {type(model).__name__}."
+    # candidate containers to look for `.layers` / `.h` on, most-specific first
+    candidates = []
+    inner = getattr(model, "model", None)
+    if inner is not None:
+        candidates.append(inner)                                  # model.model.layers
+        nested_lm = getattr(inner, "language_model", None)
+        if nested_lm is not None:
+            candidates.append(nested_lm)                          # model.model.language_model.layers
+    lm = getattr(model, "language_model", None)
+    if lm is not None:
+        candidates.append(lm)
+        candidates.append(getattr(lm, "model", lm))
+    candidates.append(model)                                      # bare TextModel: model.layers
+    transformer = getattr(model, "transformer", None)
+    if transformer is not None:
+        candidates.append(transformer)                           # GPT-2/Falcon: .h
+
+    for c in candidates:
+        layers = getattr(c, "layers", None)
+        if layers is None:
+            layers = getattr(c, "h", None)
+        if isinstance(layers, torch.nn.ModuleList):
+            return layers
+    raise AssertionError(
+        f"{type(model).__name__}: could not locate a decoder-layers ModuleList "
+        f"(tried .model[.language_model], .language_model, .transformer) — "
+        f"extend arch_adapters.resolve_decoder_layers for this architecture"
     )
-    return layers
 
 
 def is_multimodal_wrapper(config_or_model: Any) -> bool:

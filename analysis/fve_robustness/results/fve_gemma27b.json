@@ -1,0 +1,15 @@
+{
+  "key": "gemma27b",
+  "model": "Gemma-3-27B",
+  "layer": 41,
+  "n_docs": 2000,
+  "n_scored": 2000,
+  "FVE": 0.7677,
+  "mean_cos": 0.9933,
+  "D_variance": 0.05794,
+  "norm_share_in_mean": 0.9421,
+  "n_cjk": 2,
+  "n_noexp": 0,
+  "temperature": 0.4,
+  "seed_note": "pos-sample seed via --seed; AV temp 0.4 seed 0"
+}

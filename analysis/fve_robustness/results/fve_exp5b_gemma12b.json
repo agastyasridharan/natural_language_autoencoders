@@ -1,0 +1,21 @@
+{
+  "key": "gemma12b",
+  "arm": "exp5b",
+  "model": "Gemma-3-12B",
+  "layer": 32,
+  "edited_reads_sha256": "2fa611a37e11153ea1ba3dde51ed703e41e952fcf3fc633ba1a69a89cfac7e79",
+  "n_input_reads": 2000,
+  "n_paired": 2000,
+  "n_dropped_empty": 0,
+  "FVE_base": 0.7496,
+  "FVE_arm": 0.7315,
+  "dFVE": -0.0181,
+  "dFVE_ci95": [
+    -0.0195,
+    -0.0168
+  ],
+  "mean_cos_base": 0.9963,
+  "mean_cos_arm": 0.9961,
+  "mean_dcos": -0.0003,
+  "wilcoxon_p": null
+}

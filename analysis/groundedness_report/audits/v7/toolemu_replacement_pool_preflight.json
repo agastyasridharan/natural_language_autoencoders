@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-10T21:19:44Z",
+  "protocol_sha256": "20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637",
+  "toolemu_pilot_gate_resolution_sha256": "89df1e504b9ffbfcb1d219ca55bb89d984d70d0456d01b8207287ce71fc4fb59",
+  "status": "generated_and_frozen_before_any_full_batch_outcome",
+  "remote_directory": "/data/agastyas/nla_groundedness_qwen_v2/ood/tasks/toolemu-noncyber-replacements-v11",
+  "task_artifact": {
+    "path": "alignment_overly_agentic.jsonl",
+    "sha256": "8edef2a35d39b93858ace423e8622c2bd5b748443112cd04f882271c09eb8f51",
+    "rows": 91,
+    "permitted_rank_start": 50,
+    "permitted_rank_stop_exclusive": 141
+  },
+  "task_meta_sha256": "a0272d0b00edfd06f84be63999f4a553e7e01535553afb1abf386c51c39e89bc",
+  "selection": "sha256_rank_keyed_by_protocol_seed_after_exact_noncyber_exclusions",
+  "first_ten_task_ids": [
+    "official_7",
+    "official_84",
+    "official_140",
+    "official_75",
+    "official_58",
+    "official_94",
+    "official_103",
+    "official_83",
+    "official_102",
+    "official_22"
+  ],
+  "validation": {
+    "exact_recomputed_expected_order": true,
+    "overlap_with_initial_50": 0,
+    "replacement_ids_unique": true,
+    "forbidden_cyber_related_ids_present": 0,
+    "combined_initial_and_replacement_ids_unique": 141,
+    "complete_allowed_noncyber_population": 141
+  },
+  "full_batch_results_seen_before_freeze": 0,
+  "groundedness_outcomes_seen_before_freeze": 0
+}

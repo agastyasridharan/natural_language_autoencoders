@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-10T03:58:09Z",
+  "protocol_sha256": "20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637",
+  "text_model_correction_amendment_sha256": "fcd5d50f6f863337d9e9009b1129354afad1ce6dbff17b0510132d0b5d423966",
+  "toolemu_noncyber_scope_amendment_sha256": "655e8d38f2a2e1c51167e12c56baf30fa0c2193e9f2663c73bd113b2c39c5b19",
+  "toolemu_bounded_simulator_amendment_sha256": "407c80a5b9c275599db7018f14146d28d9de987d34fae2b7636d60d1ef7cb426",
+  "status": "frozen_after_diagnostic_and_before_any_admissible_toolemu_trajectory",
+  "diagnostic_run": {
+    "remote_path": "/data/agastyas/nla_groundedness_qwen_v2/ood/toolemu-noncyber-terra-pilot-v8",
+    "assigned_task_ids": [
+      "official_99",
+      "official_92",
+      "official_136"
+    ],
+    "task_reached": "official_99",
+    "manual_stop_reason": "The upstream parser at source revision ac4a7ab7ed8c7985d96231e214bd6b54304b7ddb repeated the Terra simulator call because Terra rendered the final Observation header followed by a newline, whereas the parser requires one literal ASCII space after the colon. The five-iteration setting therefore did not bound provider calls.",
+    "terra_calls": 36,
+    "input_tokens": 3900154,
+    "output_tokens": 18737,
+    "reasoning_tokens": 2267,
+    "estimated_cost_usd": 8.025152,
+    "pricing_assumption_usd_per_million_tokens": {
+      "input": 2.0,
+      "output": 12.0
+    },
+    "completed_trajectories": 0,
+    "saved_activation_vectors": 0,
+    "admissibility": "diagnostic_excluded",
+    "file_count": 37,
+    "total_bytes": 19481322,
+    "canonical_file_manifest_sha256": "d255509aa8da81475b47afbed71f14dcc2a6060a9dadb7ddf70281889cc9b347",
+    "startup_meta_sha256": "70d3a567d79ecc526f7d7cf186a01f79ea92c12aa230abf8cb027697185661fb",
+    "first_call_sha256": "13458025945cafde167cf3729c0f8c3902223be00747343bbfc91c3421234efe",
+    "last_call_sha256": "c5ba7582428297349e053152cf619b771a8a550ade8c54504dc50bd1c0cfff08"
+  },
+  "correction": {
+    "format_adapter": "Before returning Terra text to the unmodified official ToolEmu executor, replace a line break immediately following an exact `Simulator Log Summary:` or `Observation:` header with one ASCII space. Preserve the raw provider response and record every applied header normalization in the trajectory call trace.",
+    "semantic_scope": "ASCII whitespace immediately after the two official section headers only; no generated words, JSON, tool arguments, observations, or agent text may be changed.",
+    "justification": "This maps a semantically equivalent Terra rendering to the exact delimiter syntax required by the pinned official ToolEmu parser. Editing ToolEmu itself is unnecessary and would alter the pinned environment.",
+    "maximum_simulator_calls_per_trajectory": 10,
+    "maximum_cumulative_simulator_input_tokens_per_trajectory": 250000,
+    "maximum_serialized_simulator_request_bytes_per_call": 600000,
+    "budget_failure_rule": "If any ceiling is reached or exceeded, archive the completed provider-call audits, save a budget-exceeded task failure, and do not save the trajectory or any activation as admissible data.",
+    "infrastructure_failure_rule": "Provider, transport, API, and model-loading failures remain infrastructure interruptions and are not task outcomes."
+  },
+  "corrected_pilot": {
+    "cases": 3,
+    "task_ids": [
+      "official_99",
+      "official_92",
+      "official_136"
+    ],
+    "promotion_rule": "Corrected-pilot trajectories may enter the canonical set only if this amendment and all other frozen configuration remain unchanged after inspection.",
+    "success_gate": "All three cases must terminate without infrastructure or budget interruption, preserve complete Terra call audits, and contain at least one eligible assistant-language activation position.",
+    "full_run_rule": "Do not start the remaining 47 non-Cyber cases until corrected-pilot completion, usage, terminal states, failures, and activation counts are reported."
+  },
+  "unchanged": [
+    "official ToolEmu source and prompts",
+    "Qwen checkpoint, layer, decoding, and agent type",
+    "Terra model, reasoning effort, API, and retention setting",
+    "five agent iterations and per-call output-token limits",
+    "task selection, ordering, and non-Cyber scope",
+    "activation-position sampling",
+    "groundedness measurement and calibration rules"
+  ],
+  "outcomes_seen_before_freeze": {
+    "admissible_toolemu_trajectories": 0,
+    "admissible_toolemu_activations": 0,
+    "calibration_thresholds": 0,
+    "groundedness_category_verdicts": 0,
+    "groundedness_percentages": 0
+  }
+}

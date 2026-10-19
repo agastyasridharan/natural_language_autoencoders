@@ -1,0 +1,381 @@
+experiment: robustness_to_warm_start
+created_at: 2026-08-27T10:35:00-04:00
+reference:
+  report: https://turntrout.com/natural-language-autoencoder-robustness
+  implementation_repo: https://github.com/asherps/EasyNLA
+  implementation_upstream_commit: 4d728477960c18cdfa36dc04ec738d7f55af9f0b
+
+remote_root: /data/agastyas/nla_warmstart_robustness
+model:
+  hf_id: Qwen/Qwen2.5-7B-Instruct
+  layer_index: 20
+  d_model: 3584
+
+corpus:
+  hf_id: openbmb/Ultra-FineWeb
+  revision: 7ddd4170ce03e0afbd7d9b80d4bc0b8eebf877e4
+  revision_date_note: latest corpus commit before the July 2026 reference report
+  source_path: data/ultrafineweb_en/ultrafineweb-en-part-0001-of-2048.parquet
+  source_sha256: 2fd70197e66dff7b568e46fc578aedfdb20b35245dd191c5f912e09c6184aac7
+  materialized_rows: 20000
+  materialized_sha256: 0266e28bbc4758822df39648191a6a9fb3c82d8c12fa32c6bd342dac5c1f5e8f
+  unusable_short_rows:
+    count: 3
+    token_counts: [42, 47, 45]
+
+data_generation:
+  positions_per_document: 10
+  minimum_position: 50
+  extraction_seed: 42
+  split_seed: 42
+  document_level_split:
+    av_sft: 0.25
+    ar_sft: 0.25
+    rl: 0.50
+  stored_activation_norm: none
+  completed_rows: 199896
+  completed_documents: 19997
+  base_sha256: f138ecae3db995c94cf48a3b37a13b66ebd709741069312fd25f63df41548219
+  splits:
+    av_sft:
+      rows: 49983
+      documents: 4999
+      sha256: b3840ed8201c667851856ee470a51c00a82b8d675b57980064913028f57c6cb3
+    ar_sft:
+      rows: 49964
+      documents: 4999
+      sha256: 59eda0b878090a6f95c26127b975106efa6b6dc1f97be92ae1a8f92e36cf5482
+    rl:
+      rows: 99949
+      documents: 9999
+      sha256: def2b786f27370ab5bcb3bbf6ac89a0d41e6cf61026046e15d3e03066a4f88fb
+
+conditions:
+  plausible_baseline:
+    train_new_model: false
+    av_hf_id: kitft/nla-qwen2.5-7b-L20-av
+    av_revision: b88469162777ae6553bc14208eb0cb579336f8f4
+    ar_hf_id: kitft/nla-qwen2.5-7b-L20-ar
+    ar_revision: e2c9e57eac213d37a31612087f645ab6332c1bb6
+    verified_end_to_end: true
+    smoke_cosine_similarity: 0.9296603798866272
+    smoke_normalized_mse: 0.14067888259887695
+    provenance_note: >-
+      This official public checkpoint used the paper's larger open-model recipe,
+      not Zhang and Turner's 20k-Ultra-FineWeb recipe. It is an external,
+      non-matched reference; the user selected a separate 20k implausible run.
+  implausible:
+    train_new_model: true
+    corpus_documents_requested: 20000
+    corpus_documents_usable: 19997
+excluded_conditions:
+  - carthage_addendum
+  - carthage_sentiment
+teacher:
+  provider: OpenAI Batch API
+  model: gpt-5-mini
+  reasoning_effort: minimal
+  verbosity: low
+  max_completion_tokens: 600
+  total_hard_spend_cap_usd: 100.0
+  batch_ledger_cap_usd: 99.0
+  batch_price_per_million_tokens_usd:
+    input: 0.25
+    cached_input: 0.025
+    output: 2.0
+  pricing_verified_at: 2026-08-27
+  durable_cache: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/api_cache
+  prompt_sha256: 566b14dd98098434564c82ee65c230d8ae157272c45cc512ec01b0f1311b84e7
+  synchronous_qc_spend_usd: 0.041023
+  selected_prompt_qc:
+    unique_documents: 20
+    three_feature_parse_rate: 1.0
+    median_words: 80
+    min_words: 58
+    max_words: 114
+    manual_semantic_review: passed_with_reference_like_plausible_leakage
+  projected_full_generation_cost_usd: 42.7
+  full_generation:
+    requested_av_rows: 49983
+    requested_ar_rows: 49964
+    chunk_size: 8000
+    concurrent_branches: true
+    first_av_batch_id: batch_6a9055949ec081908bda1b32bd126adf
+    first_ar_batch_id: batch_6a905593f4508190a85bb7e61e6276a1
+    first_av_batch_cost_usd: 3.4293
+    first_ar_batch_cost_usd: 3.41845565
+    first_av_batch_succeeded: 8000
+    first_ar_batch_succeeded: 8000
+    first_batch_failures: 0
+    projected_cost_from_first_chunks_usd: 42.7
+    second_av_batch_id: batch_6a9059e1e0488190914f2875bae094d4
+    second_ar_batch_id: batch_6a90590cdd0c8190bec84f4a4448322c
+    completed_chunks_av: 7
+    completed_chunks_ar: 7
+    completed_rows_av: 49983
+    completed_rows_ar: 49964
+    completed_rows_total: 99947
+    completed_fraction: 1.0
+    failures_total: 0
+    batch_ledger_spend_usd: 42.2396
+    active_av_batch_id: null
+    active_ar_batch_id: null
+    final_av_batch_id: batch_6a906d183f9c8190b621bd13244955d2
+    final_ar_batch_id: batch_6a906d407f188190a1c914629903ceaf
+    retained_av_rows: 49495
+    retained_ar_rows: 49516
+    retained_rows_total: 99011
+    retained_fraction: 0.9906350365693818
+    format_drops_total: 936
+    finished_at: 2026-08-27T13:18:00-04:00
+  total_api_spend_including_qc_and_rejected_smoke_usd: 42.31016656
+
+prepared_datasets:
+  av_sft_rows: 49495
+  ar_sft_rows: 49516
+  rl_rows: 99949
+  shuffled: true
+  completed_at: 2026-08-27T13:19:00-04:00
+
+completed_sft:
+  started_at: 2026-08-27T13:19:00-04:00
+  completed: true
+  av_optimizer_steps: 774
+  ar_optimizer_steps: 774
+  av_wandb_run_id: vdkhupet
+  ar_wandb_run_id: tijafrl2
+  av_final_adapter_sha256: 40c892408125dde7d949de440a8aac5d5c4218d824647b81aa2f79178d643e50
+  ar_final_adapter_sha256: 6c65124b94c5c5537b9c2d534d09ad544fe4fde8037f5928e4fc0bf9bf283452
+  av_final_adapter_elements_finite: 322961408
+  ar_final_adapter_elements_finite: 255066112
+  ar_final_heldout_teacher_forced_normalized_mse: 0.6861
+  ar_final_heldout_teacher_forced_fve_percent: 4.57152
+
+merged_pair_smoke:
+  passed: true
+  karvonen_apply_count: 1
+  cjk_marker_leak: false
+  normalized_mse: 0.8310964703559875
+  cosine_similarity: 0.5844518542289734
+  record: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/checkpoints/implausible/merged/end_to_end_smoke.json
+
+active_training:
+  stage: four_gpu_rl_resumed
+  status: running
+  started_at: 2026-08-27T14:36:00-04:00
+  paused_at: 2026-08-27T21:38:56-04:00
+  pause_reason: user requested a verified stop after the durable step-540 checkpoint
+  resumed_at: 2026-08-28T00:36:04-04:00
+  resumed_from_step: 540
+  resume_screen_pid: 177763
+  torchrun_pid: 177766
+  resume_log: /data/agastyas/nla_warmstart_robustness/logs/qwen25_rl_vllm_implausible_resume540.log
+  wandb_run_id: 7jcur2ou
+  completed_steps_observed: 540
+  latest_step: 539
+  step_seconds_rank_range: [57, 60]
+  step_0_extraction_rate_rank_range: [0.95, 0.96]
+  step_0_fve_percent_rank_range: [-6.5, -2.0]
+  step_0_heldout_fve_percent: 7.486559798216819
+  step_0_heldout_extraction_rate: 0.99609375
+  step_0_steering_apply_rate: 1.0
+  heldout_fve_percent_observed:
+    step_0: 7.486559798216819
+    step_10: 35.26066540993082
+    step_20: 43.000696037995255
+    step_30: 48.72753882807388
+    step_40: 53.33512364813862
+    step_50: 55.75482358741131
+    step_60: 57.64217028531113
+    step_70: 58.5703349177102
+    step_80: 58.950561347958526
+    step_90: 60.297392708664596
+    step_100: 61.28606785119648
+    step_110: 60.60793314574029
+    step_120: 62.167620824970996
+    step_130: 63.26250641351558
+    step_140: 63.82696361054441
+    step_150: 64.19756776501353
+    step_160: 63.43100603554965
+    step_170: 64.24568394968631
+    step_180: 64.86945892414904
+    step_190: 65.38618625242431
+    step_200: 65.08580465775967
+    step_210: 63.61056465006557
+    step_220: 65.67930969559043
+    step_230: 65.92177185762549
+    step_240: 66.52953278896432
+    step_250: 66.10050576120618
+    step_260: 66.5509055498482
+    step_270: 68.29188260860492
+    step_280: 67.71873598083893
+    step_290: 67.60929995206199
+    step_300: 67.99147414865708
+    step_310: 66.13612795422297
+    step_320: 66.74010516368094
+    step_330: 68.4502888813873
+    step_340: 69.25334019703735
+    step_350: 67.87625116599045
+    step_360: 68.5046243110042
+    step_370: 69.01484188017298
+    step_380: 68.64108677107404
+    step_390: 69.12420150548559
+    step_400: 69.18384871809383
+    step_410: 68.84350100774927
+    step_420: 68.39522890247203
+    step_430: 69.68869012998266
+    step_440: 69.44012828311097
+    step_450: 69.25859932704618
+    step_460: 70.14255444939772
+    step_470: 70.32701656723216
+    step_480: 69.85833879095624
+    step_490: 69.58991146686328
+    step_500: 69.21520173809444
+    step_510: 70.69267686551417
+    step_520: 69.95114205688895
+    step_530: 70.77137484622703
+  heldout_extraction_rate_step_10: 1.0
+  heldout_extraction_rate_step_20: 1.0
+  first_checkpoint:
+    step: 20
+    actor_adapter_bytes: 1291899160
+    critic_model_shards: 3
+    critic_value_head_bytes: 51380312
+    optimizer_state_bytes: 928947911
+    transaction_remnants: 0
+  peak_gpu_memory_mib_observed: 87305
+  save_every_steps: 20
+  final_save_unconditional: true
+  best_heldout_fve_percent_observed: 71.36277034192568
+  best_heldout_fve_step_observed: 600
+  latest_heldout_extraction_rate: 0.99609375
+  latest_complete_checkpoint_step: 600
+  fatal_error_signatures_observed: 0
+  projected_completion_local: 2026-08-28 03:50 America/New_York (approximately; based on the observed 46-second step rate plus evaluations/checkpoints)
+  live_redundancy:
+    source_checkpoint_cadence_steps: 20
+    immutable_athena_snapshots: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/checkpoints/implausible/continuation_snapshots
+    off_cluster_private_repo: https://huggingface.co/agastyasridharan/nla-qwen25-7b-implausible-warmstart-step540
+    snapshot_contents: actor_and_reference_adapters_critic_value_head_optimizer_metrics_config_logs_and_sha256_manifest
+    dashboard_sync_interval_seconds: 60
+    latest_off_cluster_verified_step: 600
+    latest_payload_commit: ad0066a35a2b09226c86a58d224ea9eb65c74089
+    latest_receipt_commit: ec6228e80fae311722bca80952b8cef29b912482
+    latest_verified_payload_files: 24
+    latest_verified_payload_logical_bytes: 14445386512
+    latest_verified_remote_objects_including_digest_manifest: 25
+    latest_verified_total_bytes_including_digest_manifest: 14445390147
+    verification: size_and_SHA256_for_every_file
+    watchdog:
+      remote_health: /data/agastyas/nla_warmstart_robustness/ops/CONTINUATION_HEALTH.json
+      remote_heartbeat_ledger: /data/agastyas/nla_warmstart_robustness/ops/CONTINUATION_HEARTBEATS.jsonl
+      interval_seconds: 60
+      trainer_restart_authorized: false
+      idempotent_snapshot_and_upload_worker_restart_authorized: true
+      alerts_observed_at_2026_08_28T04_57_19Z: 0
+    control_plane_off_cluster_archive:
+      commit: 80e521e0562ab0374bb0da7ed09643b528912214
+      verified_files: 11
+      verification: downloaded_size_and_SHA256_for_every_file
+      verified_at_utc: 2026-08-28T05:30:16Z
+  stop_verification:
+    torchrun_exit_confirmed: true
+    gpu_compute_processes_after_stop: 0
+    checkpoint_transaction_remnants: 0
+    actor_safetensors_finite_elements: 322961408
+    critic_safetensors_finite_elements: 5439211008
+    value_head_safetensors_finite_elements: 12845056
+    optimizer_saved_step: 540
+    actor_optimizer_parameter_states: 392
+    critic_optimizer_parameter_states: 295
+    optimizer_state_tensors_finite: true
+    metric_rows_contiguous: 540
+  private_archives:
+    model_repo: https://huggingface.co/agastyasridharan/nla-qwen25-7b-implausible-warmstart-step540
+    model_repo_private: true
+    model_repo_commit: 3faf52df251fc7523a63c7fe8b06aed01dca5b2c
+    model_expected_files_verified: 167
+    model_logical_bytes_verified: 83481953967
+    data_repo: https://huggingface.co/datasets/agastyasridharan/nla-qwen25-7b-implausible-warmstart-data-20k
+    data_repo_private: true
+    data_repo_commit: a828d16d7fe721f9e9857177f2f14d1c74b41edd
+    data_expected_files_verified: 140
+    data_logical_bytes_verified: 7833942023
+    byte_digest_verification: passed
+    note: final AV SFT boilerplate README was excluded because its absolute local base_model metadata is invalid on Hugging Face; all model and tokenizer artifacts are archived
+  log: /data/agastyas/nla_warmstart_robustness/logs/qwen25_rl_vllm_implausible.log
+  preserved_aborted_partial:
+    reason: former save cadence would not persist the requested final step
+    completed_steps: 4
+    checkpoint_dir: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/checkpoints/implausible/rl_vllm_partial_savebug_20260827T1435EDT
+    log: /data/agastyas/nla_warmstart_robustness/logs/qwen25_rl_vllm_implausible_partial_savebug_20260827T1435EDT.log
+
+planned_training:
+  sft_epochs: 1
+  parameterization: bf16_base_with_lora
+  lora_r: 128
+  lora_alpha: 16
+  av:
+    micro_batch: 32
+    gradient_accumulation_steps: 2
+    effective_batch: 64
+    learning_rate: 1.0e-4
+    projected_optimizer_steps: 781
+  ar:
+    micro_batch: 64
+    gradient_accumulation_steps: 1
+    effective_batch: 64
+    learning_rate: 2.0e-5
+    projected_optimizer_steps: 781
+    transformer_blocks: 21
+  rl:
+    iterations: 780
+    global_batch_prompts: 256
+    group_size: 8
+    max_new_tokens: 150
+    train_critic: true
+    critic_parameterization: lora_r64_plus_value_head
+    reward: negative_log_normalized_mse
+    kl_estimator: k3
+    kl_beta: 0.01
+    heldout_split: document_hash
+    heldout_rows_target: 10000
+    heldout_eval_prompts: 256
+    heldout_eval_every_steps: 10
+
+mechanics_smoke:
+  input_quality: rejected_teacher_v1
+  eligible_as_experiment_result: false
+  av_sft_one_step: passed
+  ar_sft_one_step: passed
+  lora_merge_to_hf: passed
+  vllm_grpo_one_step:
+    passed: true
+    train_rollouts: 4
+    steer_apply_count: 4
+    steer_apply_rate: 1.0
+    steer_unverified_count: 0
+    extraction_rate: 1.0
+    actor_grad_norm: 1.7840690612792969
+    critic_grad_norm: 2.51914644241333
+    critic_reconstruction_mse: 1.423448920249939
+    actor_to_vllm_sync_seconds: 0.181410551071167
+  vllm_grpo_dp4_batch256_group8:
+    passed: true
+    max_new_tokens: 150
+    optimizer_step_seconds_min: 50.6
+    optimizer_step_seconds_max: 52.8
+    peak_gpu_memory_gib_approx: 83.2
+    parameter_sync_assertions: true
+    projected_780_step_hours_before_eval_and_checkpoints: 11.4
+
+acceptance_checks:
+  single_gpu_smoke_rows: 640
+  single_gpu_smoke_skipped_documents: 0
+  four_gpu_matches_single_gpu_exactly: true
+  document_splits_disjoint: true
+  activation_vectors_finite: true
+  public_plausible_pair_callable: true
+  sft_and_merge_smoke: true
+  vllm_rl_smoke: true
+  public_plausible_pair_smoke_record: /data/agastyas/nla_warmstart_robustness/baselines/qwen25_public_pair_smoke.json

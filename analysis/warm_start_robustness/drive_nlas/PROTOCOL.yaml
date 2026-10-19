@@ -1,0 +1,89 @@
+schema: nla.warm_start.drive_nlas.protocol.v1
+frozen_at: 2026-09-03T00:00:00-04:00
+scope_amended_at: 2026-09-10T00:00:00-04:00
+scope_amendment: >-
+  Per the user's later instruction, the active experiment is restricted to the
+  plausible/control versus implausible/false-but-related contrast.
+
+scope:
+  research_question: >-
+    Do independently trained NLAs with different description warm starts but
+    comparable reconstruction quality converge to semantically equivalent
+    explanations of the same held-out activations?
+  model: Qwen/Qwen2.5-7B-Instruct
+  activation_layer: 20
+  conditions:
+    - control
+    - false_but_related
+  primary_contrasts:
+    - [control, false_but_related]
+  secondary_contrasts: []
+
+checkpoint_comparisons:
+  final_or_latest:
+    control: 780
+    false_but_related: 780
+  candidate_iterations:
+    control: [200, 400, 600, 780]
+    false_but_related: [200, 400, 600, 780]
+  fve_selection:
+    objective: minimize_absolute_fve_gap_percentage_points
+    tie_break: later_iteration
+    matched_tolerance_percentage_points: 1.0
+    selection_data_must_be_disjoint_from_claim_agreement: true
+    label_if_outside_tolerance: nearest_fve
+  actor_and_critic_must_share_iteration: true
+
+fve_evaluation:
+  n_activations: 256
+  activation_norm: none
+  decode:
+    temperature: 0.0
+    top_p: 1.0
+    max_new_tokens: 150
+  failure_threshold_reward: -2.0
+  sidecar_contract_required: true
+
+claim_agreement:
+  samples_per_activation_condition: 2
+  decode:
+    temperature: 0.7
+    top_p: 1.0
+    max_new_tokens: 150
+  pairing:
+    cross_condition: all_cartesian_pairs
+    within_condition: one_unordered_pair
+    average_sample_pairs_within_activation_before_inference: true
+  atomization: lossless_atomic_claims
+  claim_strata: [broad_theme, entity_detail]
+  equivalence: mutual_entailment_at_same_specificity
+  directional_coverage: true
+  symmetric_score: harmonic_mean_of_directional_coverages
+  primary_estimand: within_condition_ceiling_minus_cross_condition_agreement
+  judge_blinded_to_condition_and_checkpoint: true
+
+inference:
+  bootstrap_replicates: 20000
+  confidence_level: 0.95
+  fineweb_cluster: doc_id
+  ood_cluster: trajectory_id
+  primary_multiplicity: not_applicable_single_contrast
+  primary_missingness: complete_case
+  sensitivity_missingness: planned_failed_pair_scores_zero
+
+controls:
+  - within_condition_repeatability
+  - mismatched_activation_negative_control
+  - judge_input_order_randomization
+  - judge_calibration_suite
+  - stratified_human_audit
+  - marker_and_cjk_injection_failure_audit
+
+stop_conditions:
+  - incomplete_or_nonfinite_checkpoint_weights
+  - actor_critic_iteration_mismatch
+  - live_tokenizer_or_sidecar_contract_failure
+  - injection_hook_not_exactly_once
+  - systematic_marker_or_cjk_leakage
+  - converted_actor_not_numerically_equivalent_to_source_checkpoint
+  - evaluation_manifest_overlap_with_training_documents

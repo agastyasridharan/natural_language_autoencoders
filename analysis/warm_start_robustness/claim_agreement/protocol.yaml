@@ -1,0 +1,117 @@
+schema_version: nla.claim_agreement.protocol.v1
+protocol_id: warm-start-claim-agreement-2026-08-28-v1
+frozen: true
+
+design:
+  temperature: 0.7
+  required_samples_per_condition: 2
+  conditions: [plausible, implausible]
+  pairing:
+    cross_initialization: all_cartesian_pairs
+    within_condition: all_unordered_pairs
+    within_activation_pair_variants: average_before_population_inference
+  fineweb:
+    benchmark_slug: fineweb
+    family: fineweb
+    bootstrap_cluster: document_id
+  ood:
+    bootstrap_cluster: trajectory_id
+    families:
+      alignment:
+        - blackmail
+        - destructive_coding_actions
+        - overly_agentic_actions
+        - factual_honesty
+        - appropriate_harmlessness
+        - sycophancy
+        - multi_turn_deception
+      capability:
+        - swe_bench_verified
+        - gpqa_diamond
+        - humanitys_last_exam
+        - tau2_bench_retail
+        - mmmlu
+        - browsecomp
+        - terminal_bench_2
+        - financeagent
+        - cybergym
+    primary_macro: equal_weight_16_benchmark_families
+    secondary_group_macro: equal_weight_alignment_capability_groups
+
+segmentation:
+  instrument_version: lossless-atomic-v1
+  representation: ordered_lossless_character_tiling
+  specificity_labels: [broad_theme, entity_detail]
+  nonclaim_label: not_applicable
+  validation:
+    require_exact_source_reconstruction: true
+    require_nonempty_claim_set: true
+    offsets_computed_locally: true
+
+equivalence:
+  instrument_version: strict-mutual-entailment-v1
+  criterion: mutual_entailment_same_specificity
+  same_topic_is_not_equivalent: true
+  broader_or_narrower_is_not_equivalent: true
+  matching_rule: existential_any_counterpart
+  one_to_one_constraint: false
+
+scoring:
+  strata: [all, broad_theme, entity_detail]
+  directional:
+    left_to_right: matched_left_claims / all_left_claims
+    right_to_left: matched_right_claims / all_right_claims
+  harmonic: 2 * left_to_right * right_to_left / (left_to_right + right_to_left)
+  zero_overlap_harmonic: 0.0
+  primary_analysis: complete_case
+  sensitivity_analysis: zero_failure
+  undefined_zero_claim_stratum:
+    complete_case: exclude
+    zero_failure: impute_zero
+
+inference:
+  population_unit: activation
+  pair_variants: mean_within_activation
+  bootstrap_replicates: 20000
+  bootstrap_seed: 17371
+  interval: percentile_95
+  fineweb_cluster: document_id
+  ood_cluster: trajectory_id
+  report:
+    - fineweb_overall
+    - ood_by_benchmark
+    - ood_by_benchmark_family
+    - ood_by_alignment_capability_group
+    - ood_micro
+    - ood_equal_16_benchmark_family_macro_primary
+    - ood_equal_alignment_capability_group_macro_secondary
+
+api:
+  provider: openai
+  endpoint: https://api.openai.com/v1/responses
+  api_key_environment_variable: OPENAI_API_KEY_2
+  forbidden_key_fallback: OPENAI_API_KEY
+  model: gpt-5-nano-2025-08-07
+  reasoning_effort: minimal
+  service_tier: default
+  store: false
+  strict_structured_outputs: true
+  automatic_model_fallback: false
+  automatic_retry: false
+  max_output_tokens:
+    segmentation: 4096
+    equivalence: 2048
+  pricing_usd_per_million_tokens:
+    input: 0.05
+    cached_input: 0.005
+    output: 0.40
+  maximum_hard_budget_usd: 12.0
+  default_hard_budget_usd: 12.0
+  accounting:
+    reported_usage: exact
+    missing_usage: retain_full_preflight_reservation
+    preflight_input_bound: utf8_request_bytes_plus_4096_tokens
+
+official_openai_sources:
+  model: https://developers.openai.com/api/docs/models/gpt-5-nano
+  responses: https://developers.openai.com/api/reference/resources/responses/methods/create

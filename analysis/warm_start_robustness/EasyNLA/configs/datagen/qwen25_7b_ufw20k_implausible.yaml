@@ -1,0 +1,26 @@
+model: qwen7b
+base_model: Qwen/Qwen2.5-7B-Instruct
+layer_index: 20
+input_dir: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/base_data
+output_dir: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/conditions/implausible
+
+stage2:
+  provider_cls: nla.datagen.providers.OpenAIBatchProvider
+  provider_kwargs:
+    model: gpt-5-mini
+    max_tokens: 600
+    reasoning_effort: minimal
+    verbosity: low
+    cache_dir: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/api_cache
+    spend_cap_usd: 99.0
+    batch_input_per_million_usd: 0.25
+    batch_cached_input_per_million_usd: 0.025
+    batch_output_per_million_usd: 2.0
+  instruction_template_path: configs/prompts/warmstart_implausible.txt
+  chunk_size: 8000
+stage3:
+  keep_debug_metadata: true
+shuffle:
+  enabled: true
+  seed: 42
+storage_cls: nla.datagen.storage.LocalStorage

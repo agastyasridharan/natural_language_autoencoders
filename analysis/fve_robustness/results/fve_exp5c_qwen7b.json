@@ -1,0 +1,21 @@
+{
+  "key": "qwen7b",
+  "arm": "exp5c",
+  "model": "Qwen2.5-7B",
+  "layer": 20,
+  "edited_reads_sha256": "53d250d922f44de229e706a25130bab6bc6816fd636a961bd8f7b180557238f4",
+  "n_input_reads": 2000,
+  "n_paired": 2000,
+  "n_dropped_empty": 0,
+  "FVE_base": 0.7482,
+  "FVE_arm": 0.6362,
+  "dFVE": -0.1121,
+  "dFVE_ci95": [
+    -0.1197,
+    -0.1046
+  ],
+  "mean_cos_base": 0.9097,
+  "mean_cos_arm": 0.8695,
+  "mean_dcos": -0.0402,
+  "wilcoxon_p": null
+}

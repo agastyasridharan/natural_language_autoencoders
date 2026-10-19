@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-11T00:07:41Z",
+  "protocol_sha256": "20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637",
+  "text_model_correction_amendment_sha256": "fcd5d50f6f863337d9e9009b1129354afad1ce6dbff17b0510132d0b5d423966",
+  "toolemu_noncyber_scope_amendment_sha256": "655e8d38f2a2e1c51167e12c56baf30fa0c2193e9f2663c73bd113b2c39c5b19",
+  "toolemu_bounded_simulator_amendment_sha256": "407c80a5b9c275599db7018f14146d28d9de987d34fae2b7636d60d1ef7cb426",
+  "toolemu_format_budget_amendment_sha256": "867231016e6cf08c46ea1f0295bef9b6f4fdc2888deac1748cf3b4d02c0cd71f",
+  "toolemu_shared_state_amendment_sha256": "5ab8d198167c16618b543883dcfa2d9888d06b8809347ed855faefc5a752326a",
+  "toolemu_pilot_gate_resolution_sha256": "89df1e504b9ffbfcb1d219ca55bb89d984d70d0456d01b8207287ce71fc4fb59",
+  "toolemu_failure_classification_amendment_sha256": "8c68410b16bae19b45beeae5fb5ba8dbaa1e88bf6f6f7acb80e4316b616a318d",
+  "run": "/data/agastyas/nla_groundedness_qwen_v2/ood/toolemu-noncyber-terra-initial-v11",
+  "task_artifact_sha256": "6807c340e91d881a4c61dba00a5644eddde5f144793acb214ec5086c7b04d8ca",
+  "result": {
+    "assigned_tasks": 50,
+    "covered_task_ids": 50,
+    "retained_trajectories": 48,
+    "replaceable_exclusions": 2,
+    "failure_kinds": {
+      "no_eligible_assistant_token_after_minimum_context_rule": 2
+    },
+    "excluded_task_ids": [
+      "official_92",
+      "official_23"
+    ],
+    "activation_vectors": 192,
+    "activation_shape": [
+      3584
+    ],
+    "all_vectors_finite": true,
+    "minimum_eligible_position_population_among_retained": 31,
+    "agent_calls": 193,
+    "normal_max_iteration_terminal_states": 22,
+    "other_normal_terminal_states": 26
+  },
+  "simulator_audit": {
+    "successful_calls": 183,
+    "all_requested_model": "gpt-5.6-terra",
+    "all_resolved_model_prefix": "gpt-5.6-terra",
+    "all_reasoning_effort": "low",
+    "all_store_false": true,
+    "input_tokens": 1158986,
+    "output_tokens": 136256,
+    "reasoning_tokens": 17251,
+    "estimated_cost_usd_under_frozen_assumption": 3.953044,
+    "maximum_calls_in_retained_trajectory": 9,
+    "maximum_cumulative_input_tokens_in_retained_trajectory": 69709,
+    "maximum_serialized_request_bytes": 54528,
+    "observation_header_normalizations": 137,
+    "simulator_log_summary_header_normalizations": 0
+  },
+  "frozen_limits": {
+    "maximum_calls_per_trajectory": 10,
+    "maximum_cumulative_input_tokens_per_trajectory": 250000,
+    "maximum_serialized_request_bytes_per_call": 600000
+  },
+  "infrastructure": {
+    "interrupted_attempts_without_task_outcomes": 2,
+    "incident_audits": [
+      {
+        "path": "audits/v7/toolemu_initial_v11_interruption_001.json",
+        "sha256": "b70f97014237ae50f0888b11a42f347747c67d95638c10be3a49d024aa98a681"
+      },
+      {
+        "path": "audits/v7/toolemu_initial_v11_interruption_002.json",
+        "sha256": "d025352a2cfd3406e905cf02e48873aaaa5ce3462f17173c270ea502bc48f028"
+      }
+    ]
+  },
+  "integrity": {
+    "meta_status": "failed",
+    "meta_status_interpretation": "The runner uses failed when one or more frozen replaceable exclusions exist; there was no unclassified or terminal infrastructure failure.",
+    "meta_sha256": "61d2b9c2c2bcb10b945fa05646f00eb3933b408b8b4e01a3ae5836cc561086b6",
+    "file_count": 436,
+    "total_bytes": 19291496,
+    "file_manifest_sha256": "26911e1d3aef93d1e227b8ac978a757d61cd7d89ceaf0c270c001bd9bbbff7a6",
+    "ordered_activation_digest": "caf15839168b406940c402186a4eb893791a54e1f2c2430c40fc0079cf712e8c",
+    "all_task_coverage_checks_passed": true,
+    "all_provenance_checks_passed": true,
+    "all_vector_checks_passed": true,
+    "all_provider_call_checks_passed": true,
+    "all_budget_checks_passed": true
+  },
+  "next_step": "Run the shortest prefix of the frozen replacement artifact needed to obtain two additional analyzable trajectories, extending the prefix only for a frozen replaceable exclusion."
+}

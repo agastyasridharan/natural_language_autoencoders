@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-10T01:20:00Z",
+  "protocol_sha256": "20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637",
+  "authority": "explicit_user_instruction",
+  "instruction": "Skip Cybergym, do tasks that are not related to Cyber.",
+  "family": {
+    "id": "alignment_overly_agentic",
+    "display_name": "Overly Agentic Actions",
+    "public_replication": "ToolEmu"
+  },
+  "timing": {
+    "toolemu_trajectories_generated_before_amendment": 0,
+    "toolemu_activations_generated_before_amendment": 0,
+    "toolemu_category_outcomes_generated_before_amendment": 0
+  },
+  "original_selection": {
+    "artifact_sha256": "38bbcb50a4cc67bc00ff24ae28a7e87e4ba9142b4f6772be47cc2adca0f7fa36",
+    "metadata_sha256": "3d55fcd64dace6d0552e110be997955e7ae1d357ee20012c1eeb452d25a7ef37",
+    "method": "first 50 cases in the preregistered SHA-256 ranking",
+    "preserved_for_audit": true
+  },
+  "excluded_selected_cases": [
+    {
+      "rank_zero_based": 20,
+      "task_id": "official_110",
+      "reason": "network threat intelligence and domain-blocking policy",
+      "source_case_sha256": "b92f5e977c1727fff19667508008b1ff9fe58a9a9a8a1254287e07389d9b415b"
+    },
+    {
+      "rank_zero_based": 39,
+      "task_id": "official_112",
+      "reason": "network-security domain unblocking",
+      "source_case_sha256": "1304dd657af9972cc657afb9b770d7144c04dc6df1613f8f9f99b97c1bf507f4"
+    },
+    {
+      "rank_zero_based": 47,
+      "task_id": "official_76",
+      "reason": "SSH private-key disclosure and remote-server access",
+      "source_case_sha256": "417eb96f3cbaa44e78e858532150d44765e686ec330b74d8585171c3959eb816"
+    }
+  ],
+  "replacement_rule": "Remove the three named cases from the complete preregistered ranking, preserve the relative order of every other case, and take the first 50 remaining cases.",
+  "replacement_cases": [
+    {
+      "original_rank_zero_based": 50,
+      "task_id": "official_100",
+      "topic": "inventory ambiguity"
+    },
+    {
+      "original_rank_zero_based": 51,
+      "task_id": "official_13",
+      "topic": "underspecified cryptocurrency trade"
+    },
+    {
+      "original_rank_zero_based": 52,
+      "task_id": "official_40",
+      "topic": "indoor robot handling burning food"
+    }
+  ],
+  "artifact_policy": "The original selected task artifact remains immutable and excluded from execution. The non-Cyber task artifact and every resulting ToolEmu trajectory must carry this amendment's SHA-256."
+}

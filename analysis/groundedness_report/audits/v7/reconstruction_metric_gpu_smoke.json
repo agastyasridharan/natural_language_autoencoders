@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-10T01:16:30Z",
+  "status": "passed",
+  "purpose": "Non-outcome GPU smoke test of the approved directional reconstruction metric against the pinned released AR checkpoint.",
+  "protocol_sha256": "20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637",
+  "reconstruction_metric_amendment_sha256": "3ec1a6fb1f6668f00d83caf48fd033d2d8e155b1021a25806a3587403c839057",
+  "formula": "squared_l2(unit(h), unit(AR(z)))",
+  "checkpoint": {
+    "repo_id": "kitft/nla-qwen2.5-7b-L20-ar",
+    "revision": "e2c9e57eac213d37a31612087f645ab6332c1bb6",
+    "layers_loaded": 21,
+    "d_model": 3584,
+    "mse_scale": 59.87
+  },
+  "device": {
+    "host": "athena01",
+    "visible_gpu": 0,
+    "gpu_model": "NVIDIA H100 NVL"
+  },
+  "input": {
+    "kind": "FineWeb manual-audit record; not a calibration or category result",
+    "record_idx": 16,
+    "record_path": "/data/agastyas/nla_groundedness_qwen_v2/audit/v5-segmentation/records/000016.json",
+    "record_sha256": "e5777aed6dd7c6022895e51adfee285d76eafafb27670bd220c12f11fb6aa15a"
+  },
+  "observed": {
+    "h_norm": 0.9999999999999999,
+    "raw_ar_norm": 209.46630859375,
+    "directional_error": 0.2646627495998094
+  },
+  "outcome_policy": {
+    "threshold_frozen": false,
+    "category_verdict_generated": false,
+    "used_for_metric_or_threshold_selection": false
+  }
+}

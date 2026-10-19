@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-10T01:29:00Z",
+  "protocol_sha256": "20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637",
+  "toolemu_noncyber_scope_amendment_sha256": "655e8d38f2a2e1c51167e12c56baf30fa0c2193e9f2663c73bd113b2c39c5b19",
+  "canonical_task_artifact": {
+    "path": "ood/tasks/toolemu-noncyber-v7/alignment_overly_agentic.jsonl",
+    "rows": 50,
+    "sha256": "6807c340e91d881a4c61dba00a5644eddde5f144793acb214ec5086c7b04d8ca",
+    "metadata_sha256": "bf59b9c5d2ee598684b355426b1433e5cc0e3e426b9595d617da19de18a1506f"
+  },
+  "preflight": {
+    "official_environment_imports": "passed",
+    "pinned_source_hash_checks": "passed",
+    "openai_endpoint_through_loopback_reverse_tunnel": "passed_with_expected_unauthenticated_http_401",
+    "credential_variable": "OPENAI_API_KEY_2",
+    "fallback_key_used": false,
+    "target_checkpoint_load": "passed",
+    "target_device": "visible cuda:0"
+  },
+  "discarded_pretrajectory_attempts": [
+    {
+      "output_name": "toolemu-noncyber-smoke-v7",
+      "result": "stopped_before_model_load",
+      "cause": "Hugging Face cache root pointed one directory above the actual cache",
+      "files_written": 0
+    },
+    {
+      "output_name": "toolemu-noncyber-smoke2-v7",
+      "result": "stopped_before_model_load",
+      "cause": "The pinned environment lacked optional accelerate support for device_map=auto",
+      "files_written": 0
+    },
+    {
+      "output_name": "toolemu-noncyber-smoke3-v7",
+      "result": "failed_before_simulator_call_or_trajectory",
+      "cause": "The legacy LangChain callback required token_usage in the local Qwen adapter result",
+      "files_written": 2,
+      "bytes": 3066,
+      "ordered_file_manifest_sha256": "519e1c59c8c86b81384688f87651ee217a12f066a4181bf36bb4f1c0dcfad4dd",
+      "meta_sha256": "57d0b4000fb40cdd84506a1d84b76b0dbfdcb01a0905a3dccc54ea082771e692",
+      "failure_sha256": "d8fc85a408dab94edcd7d3ab25fdb5dfa4d474ff155053907ce86354fd477312"
+    }
+  ],
+  "official_simulator_smoke": {
+    "output_name": "toolemu-noncyber-smoke4-v7",
+    "task_id": "official_99",
+    "maximum_agent_iterations": 15,
+    "luna_calls_archived": 55,
+    "sum_input_tokens": 5281220,
+    "sum_output_tokens": 12329,
+    "sum_total_tokens": 5293549,
+    "input_tokens_per_call": {
+      "minimum": 5688,
+      "median": 79372,
+      "maximum": 251716
+    },
+    "terminal_result": "infrastructure_interruption",
+    "terminal_reason": "A completed Luna response contained no nonempty output text.",
+    "trajectories_written": 0,
+    "activations_written": 0,
+    "files_written": 56,
+    "bytes": 25243604,
+    "ordered_file_manifest_sha256": "51d69745cdbf47ae4c71093131622557777246cd889205ed78bfc42358152c72",
+    "meta_sha256": "6c42602bd0403a838e2afdfba76ba2a34cb1f0fd9c2f1df7db29ec1310744a67"
+  },
+  "decision": {
+    "full_50_case_run_started": false,
+    "reason": "The official adversarial emulator is not operationally reliable or economical under the frozen 15-iteration Luna configuration. One incomplete case consumed 5.29 million tokens and ended without a trajectory.",
+    "required_before_resume": "Approve and preregister a bounded simulator amendment, or provide a different faithful and affordable ToolEmu execution plan."
+  }
+}

@@ -1,0 +1,8 @@
+# Per-activation vector dumps (specificity matrices + per-claim Delta-logp),
+# ~235 MB per atom run. Regenerable from the run; the studio reads them from
+# disk locally but they are not versioned.
+runs/*/vectors/
+
+# Smoke-test cycle runs: incomplete pipeline checks (no cycle_report.json, early
+# claim layout), superseded by the full runs. Local-only, never a result.
+cycle_runs/*-smoke/

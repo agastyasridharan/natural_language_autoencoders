@@ -1,0 +1,42 @@
+model: qwen7b
+base_model: Qwen/Qwen2.5-7B-Instruct
+layer_index: 20
+output_dir: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/base_data
+
+corpus:
+  # Materialized from the first English shard at the revision used by the
+  # July 2026 reference experiment; see the adjacent .manifest.json.
+  name: /data/agastyas/nla_warmstart_robustness/corpus/ultrafineweb_en_7ddd417_first20000.parquet
+  id: openbmb/Ultra-FineWeb
+  revision: 7ddd4170ce03e0afbd7d9b80d4bc0b8eebf877e4
+  config: null
+  split: en
+  text_column: content
+  start: 0
+  length: 20000
+
+stage0:
+  positions_per_doc: 10
+  chunk_size: 256
+  chunks_per_file: 2
+  seed: 42
+  multigpu: true
+  extractor_kwargs: {batch_size: 16, max_length: 4096}
+
+stage1:
+  av_sft_frac: 0.25
+  ar_sft_frac: 0.25
+  rl_frac: 0.50
+  seed: 42
+
+# Stages 2-3 are run from the two condition configs below.
+stage2:
+  provider_cls: nla.datagen.providers.OpenAIBatchProvider
+  provider_kwargs: {}
+  chunk_size: 8000
+stage3:
+  keep_debug_metadata: true
+shuffle:
+  enabled: true
+  seed: 42
+storage_cls: nla.datagen.storage.LocalStorage

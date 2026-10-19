@@ -1,0 +1,37 @@
+# One-epoch AR warm start for the 20k-document implausible-initialization run.
+mode: ar
+base_ckpt: /data/agastyas/hf_cache/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28
+parquet: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/conditions/implausible/ar_sft_shuf.parquet
+sidecar: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/conditions/implausible/ar_sft_shuf.parquet
+save_dir: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/checkpoints/implausible/ar_sft
+
+# num_steps deliberately omitted: train_sft derives exactly one epoch.
+batch_size: 64
+gradient_accumulation_steps: 1
+ar_num_layers: 21
+max_len: 1024
+lr: 2.0e-5
+min_lr: 2.0e-6
+lr_warmup_steps: 50
+max_grad_norm: 1.0
+gradient_checkpointing: false
+attn_implementation: sdpa
+strip_final_norm: true
+
+quant: none
+use_lora: true
+lora_r: 128
+lora_alpha: 16
+
+# AV and AR SFT splits are document-disjoint. This is a genuine AR holdout.
+heldout_parquet: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/conditions/implausible/av_sft_shuf.parquet
+heldout_rows: 1000
+heldout_every: 100
+save_every: 100
+seed: 42
+
+wandb_project: nla-warmstart-robustness
+wandb_name: qwen25-7b-implausible-ar-sft-20k
+wandb_group: qwen25-7b-implausible-20k
+wandb_tags: warm-start,implausible,qwen2.5-7b,ufw20k,ar-sft
+

@@ -1,0 +1,34 @@
+# One-epoch AV warm start for the 20k-document implausible-initialization run.
+mode: av
+base_ckpt: /data/agastyas/hf_cache/models--Qwen--Qwen2.5-7B-Instruct/snapshots/a09a35458c702b33eeacc393d103063234e8bc28
+parquet: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/conditions/implausible/av_sft_shuf.parquet
+sidecar: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/conditions/implausible/av_sft_shuf.parquet
+save_dir: /data/agastyas/nla_warmstart_robustness/qwen25_7b_seed42/checkpoints/implausible/av_sft
+
+# num_steps deliberately omitted: train_sft derives exactly one epoch.
+batch_size: 32
+gradient_accumulation_steps: 2
+max_len: 1024
+lr: 1.0e-4
+min_lr: 1.0e-5
+lr_warmup_steps: 50
+max_grad_norm: 1.0
+gradient_checkpointing: true
+attn_implementation: sdpa
+
+quant: none
+use_lora: true
+lora_r: 128
+lora_alpha: 16
+
+sample_every: 100
+n_samples: 4
+sample_max_new_tokens: 150
+save_every: 100
+seed: 42
+
+wandb_project: nla-warmstart-robustness
+wandb_name: qwen25-7b-implausible-av-sft-20k
+wandb_group: qwen25-7b-implausible-20k
+wandb_tags: warm-start,implausible,qwen2.5-7b,ufw20k,av-sft
+

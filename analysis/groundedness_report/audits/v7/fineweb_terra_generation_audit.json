@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-10T01:49:00Z",
+  "protocol_sha256": "20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637",
+  "text_model_correction_amendment_sha256": "fcd5d50f6f863337d9e9009b1129354afad1ce6dbff17b0510132d0b5d423966",
+  "status": "generation_complete_pending_blinded_human_review",
+  "model": {
+    "requested": "gpt-5.6-terra",
+    "resolved_values": [
+      "gpt-5.6-terra"
+    ],
+    "reasoning_effort": "low",
+    "api": "responses",
+    "credential_variable": "OPENAI_API_KEY_2",
+    "store": false,
+    "fallback_model_used": false,
+    "fallback_key_used": false
+  },
+  "source": {
+    "manifest_sha256": "5c55e830e3161fba32daa72551210833e4d22ea7ca8abeb896e82900456d217d",
+    "documents_sha256": "31ba67b2894bcd93a671f988904671a8f2f250aa1ac26e6258df229dc1b1ea59"
+  },
+  "segmentation": {
+    "selected_items": 100,
+    "complete_records": 100,
+    "primary_calls": 100,
+    "preregistered_adjudication_calls": 3,
+    "failures": 0,
+    "selection_sha256": "9249ab8a4df7344bdf9ff56592bcb818b989d86cd357d8563f930808bc45e363",
+    "status_sha256": "7aacba0cf0d1ec785c26540791748ba6304c2a4e5debbf438beeae8a728973e0"
+  },
+  "decoys": {
+    "selected_claims": 25,
+    "candidate_count_per_claim": 64,
+    "minimum_strip_casefold_unique_candidates": 64,
+    "minimum_retained_candidates": 64,
+    "failures": 0
+  },
+  "manual_review": {
+    "segmentation_rows": 100,
+    "unique_segmentation_audit_ids": 100,
+    "decoy_rows": 200,
+    "unique_decoy_audit_ids": 200,
+    "segmentation_csv_sha256": "5252cd87448fb57be7daeae5cab74fe4b1770afb34e21be26577640c75a4c4eb",
+    "decoy_csv_sha256": "ad85bd294034b5646aef0b2726fa93a23f037e0133143c32c9eb0debf8b0eb01",
+    "answer_key_sha256": "404f38ccf7c9a264c5d139339cdf180f9c6f47768e88af7267ca07b4790ee2e2",
+    "metadata_sha256": "f354e5616b258084f508c8c85317a8b9dea8944d50b3ab554d88049507ba7ea1",
+    "review_fields_filled": false
+  },
+  "api_usage": {
+    "calls": 203,
+    "input_tokens": 584471,
+    "cached_input_tokens": 0,
+    "output_tokens": 173317,
+    "estimated_cost_usd_at_public_2026_09_10_rates": 3.248746,
+    "billing_note": "Estimate from archived response usage and public $2/M input, $0.20/M cached input, and $12/M output rates; actual account billing may differ."
+  },
+  "all_generated_file_hash_lines_aggregate_sha256": "2d04cf0be9a6a083166e2d8db1406ef121e64540e92e9797d1c0b34f3d7ac723",
+  "outcomes_generated": {
+    "calibration_thresholds": 0,
+    "groundedness_category_verdicts": 0,
+    "groundedness_percentages": 0
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/asherps/EasyNLA",
+  "base_commit": "4d728477960c18cdfa36dc04ec738d7f55af9f0b",
+  "license_path": "../analysis/warm_start_robustness/EasyNLA/LICENSE",
+  "note": "Vendored modified warm-start checkout; differs from the separate cross-model-swap checkout."
+}

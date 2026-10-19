@@ -1,0 +1,38 @@
+\documentclass[10pt,twocolumn]{article}
+\usepackage[a4paper,margin=2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{times,microtype,amsmath,amssymb,graphicx}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage[round,authoryear]{natbib}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\footnotesize ILLUSTRATIVE DRAFT --- ALL RESULT VALUES ARE SYNTHETIC}
+\fancyfoot[C]{\thepage}
+\setlength{\headheight}{14pt}
+\setlength{\columnsep}{0.65cm}
+\setlength{\textfloatsep}{13pt plus 2pt minus 2pt}
+\setlength{\parindent}{1em}
+\title{Groundedness Evaluation: Illustrative Results Draft}
+\author{}
+\date{}
+\begin{document}
+\raggedbottom
+\maketitle
+\thispagestyle{fancy}
+\noindent\textit{Standalone preview of the proposed manuscript insertion.
+The detailed validation protocol is supplied separately.
+All numerical outcomes in this preview are invented placeholders.}
+\setcounter{section}{2}
+\setcounter{subsection}{5}
+\input{results.tex}
+\begin{thebibliography}{9}
+\bibitem[Fraser-Taliente et~al.(2026)]{frasertaliente2026nla}
+Kit Fraser-Taliente, Subhash Kantamneni, Euan Ong, et~al.
+\newblock Natural language autoencoders produce unsupervised explanations of
+LLM activations.
+\newblock \emph{Transformer Circuits Thread}, 2026.
+\newblock \href{https://transformer-circuits.pub/2026/nla/index.html}{Online article and supplementary evaluations}.
+\end{thebibliography}
+\end{document}

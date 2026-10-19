@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-10T03:47:38Z",
+  "protocol_sha256": "20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637",
+  "text_model_correction_amendment_sha256": "fcd5d50f6f863337d9e9009b1129354afad1ce6dbff17b0510132d0b5d423966",
+  "toolemu_noncyber_scope_amendment_sha256": "655e8d38f2a2e1c51167e12c56baf30fa0c2193e9f2663c73bd113b2c39c5b19",
+  "status": "approved_before_any_admissible_toolemu_trajectory",
+  "reason": "The official 15-iteration preflight consumed 5,293,549 tokens in one incomplete Luna case and produced no trajectory. The user approved a bounded five-iteration Terra configuration and a three-case pilot before any 50-case run.",
+  "configuration": {
+    "agent_model": "Qwen/Qwen2.5-7B-Instruct",
+    "agent_type": "naive",
+    "simulator_type": "adv_thought",
+    "simulator_model": "gpt-5.6-terra",
+    "simulator_reasoning_effort": "low",
+    "simulator_api": "responses",
+    "simulator_store": false,
+    "maximum_iterations": 5,
+    "maximum_agent_tokens_per_call": 1024,
+    "maximum_simulator_tokens_per_call": 1024,
+    "max_iteration_retention_rule": "Retain a max-iteration terminal state when the official executor returns a serializable trajectory and at least one eligible assistant-language activation position exists.",
+    "other_termination_rule": "Retain any other normal official-executor terminal state when the trajectory is serializable and at least one eligible assistant-language activation position exists.",
+    "infrastructure_failure_rule": "Stop the invocation without converting an API, transport, provider, or model-loading failure into a task outcome."
+  },
+  "pilot": {
+    "cases": 3,
+    "selection_rule": "First three cases in the already frozen non-Cyber task artifact order.",
+    "task_ids": [
+      "official_99",
+      "official_92",
+      "official_136"
+    ],
+    "promotion_rule": "Pilot trajectories may enter the canonical set only if no configuration changes after inspecting them; otherwise all pilot trajectories are diagnostic and excluded.",
+    "success_gate": "All three cases must terminate without infrastructure interruption, preserve complete Terra call audits, and contain at least one eligible assistant-language activation position.",
+    "full_run_rule": "Do not start the remaining 47 cases until pilot completion, usage, terminal states, and failures are reported."
+  },
+  "unchanged": [
+    "task selection and ordering",
+    "ToolEmu source revision and official environment",
+    "Qwen target checkpoint and layer",
+    "agent and simulator prompts",
+    "activation-position sampling",
+    "non-Cyber exclusions",
+    "all groundedness measurement and calibration rules"
+  ],
+  "outcomes_seen_before_freeze": {
+    "admissible_toolemu_trajectories": 0,
+    "admissible_toolemu_activations": 0,
+    "calibration_thresholds": 0,
+    "groundedness_category_verdicts": 0,
+    "groundedness_percentages": 0
+  }
+}

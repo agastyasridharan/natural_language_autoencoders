@@ -1,0 +1,19 @@
+{
+  "key": "qwen7b",
+  "arm": "exp6b",
+  "model": "Qwen2.5-7B",
+  "layer": 20,
+  "n_paired": 2000,
+  "n_dropped_empty": 0,
+  "FVE_base": 0.7482,
+  "FVE_arm": 0.5438,
+  "dFVE": -0.2044,
+  "dFVE_ci95": [
+    -0.2149,
+    -0.1941
+  ],
+  "mean_cos_base": 0.9097,
+  "mean_cos_arm": 0.8364,
+  "mean_dcos": -0.0733,
+  "wilcoxon_p": null
+}

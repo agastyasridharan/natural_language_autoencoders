@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-09T21:25:00Z",
+  "protocol_sha256": "20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637",
+  "authority": "explicit_user_instruction",
+  "instruction": "Skip Cybergym, do tasks that are not related to Cyber.",
+  "excluded_family": {
+    "id": "capability_cybergym",
+    "display_name": "CyberGym"
+  },
+  "state_at_exclusion": {
+    "canonical_trajectories": 0,
+    "canonical_activations": 0,
+    "canonical_av_reads": 0,
+    "dataset_payload_downloaded": false,
+    "public_metadata_file_downloaded_before_exclusion": "ood/datasets/staged/cybergym/tasks.json",
+    "public_metadata_file_size_bytes": 1856784,
+    "public_metadata_file_sha256": "9cea452cc1e1a3703e0f60c2dfc8642430aab9f50433f976581509de58c7048f",
+    "isolated_service_stopped": true
+  },
+  "data_handling": {
+    "existing_public_metadata_retained_for_provenance": true,
+    "cybergym_generation_forbidden_in_current_scope": true,
+    "cybergym_data_must_not_enter_gold_or_analysis_manifests": true
+  },
+  "analysis_consequence": "The frozen preregistration requires exactly 16 OOD families. With CyberGym excluded, the existing 16-family macro estimator must continue to fail closed. Any 15-family aggregate must be explicitly labeled post-amendment and must not be reported as the preregistered 16-family result.",
+  "current_interpretation_pending_any_broader_user_instruction": "This amendment excludes the CyberGym benchmark family. It does not silently alter the official case composition of other named benchmarks."
+}

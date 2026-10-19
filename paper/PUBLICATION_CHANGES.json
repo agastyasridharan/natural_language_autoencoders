@@ -1,0 +1,21 @@
+{
+  "changes": [
+    {
+      "path": "analysis/fve_robustness/exp6_complete.py",
+      "source_sha256": "d72ecbdd9e3c25360b6f3dc357cc32eecbafdf3129e26d62156da608b7701c0b",
+      "published_sha256": "8f2ee760dc02233b2c0e28f55a8356541e428b6fba5ae00449396b05f68f14fb",
+      "change": "Load external source documents lazily; pure helper imports work without raw dataset. Experiment-time missing data still fails explicitly."
+    },
+    {
+      "path": "analysis/fve_robustness/exp7_cluster.py",
+      "source_sha256": "059c74be1192004b07eb5f74eec427d56106641e2f22f682f27f306812f355b8",
+      "published_sha256": "ca1a147c3ffa22920dff61a8c577e7ae7f30d5a6ceefc922e9740ab7297def4e",
+      "change": "Load external source documents lazily; pure helper imports work without raw dataset. Experiment-time missing data still fails explicitly."
+    }
+  ],
+  "added_files": [
+    "paper/README.md",
+    "paper/render_robustness.py",
+    "paper/.gitignore"
+  ]
+}

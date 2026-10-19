@@ -1,0 +1,45 @@
+# Copy this file to a versioned, immutable calibration file only after measuring
+# the calibration partition. `validate-calibration` deliberately rejects nulls.
+schema_version: 3
+report_sha256: ea7d2316e7a23ea1cf51eaf326627902cc150da0ba523b2538a1b8ac9b2adf97
+protocol_sha256: 20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637
+reconstruction_metric_amendment_sha256: 3ec1a6fb1f6668f00d83caf48fd033d2d8e155b1021a25806a3587403c839057
+
+# Copy these values from the frozen calibration output. They prevent applying
+# thresholds to another model, run, split, reference, or shuffled-control map.
+model_key: null
+run_id: null
+split_sha256: null
+reference_sha256: null
+negative_control_sha256: null
+
+# Number of controls used for every resolved claim.
+k: 20
+
+# Finite, ascending schedule. The first rung is epsilon_ov; later rungs are the
+# preregistered widening schedule. The magnitude filter is never disabled.
+eps_overlap_ladder: [0.10, 0.20, 0.35, 0.50, 0.75, 1.00]
+
+# |S(decoy | h_ref) - S(real | h_ref)| <= eps_base
+eps_base: null
+
+# E(z; h) = ||unit(h) - unit(AR(z))||^2 under the approved amendment.
+# |E(z*) - E(z)| <= eps_reconstruction * E(z)
+eps_reconstruction: null
+
+# A*_m <= tau_decoy_support. This is one-sided as written in the report.
+tau_decoy_support: null
+
+# R_i > Q_0.95(D*) + kappa_spec
+kappa_spec: null
+
+# median(X*) > kappa_theme
+kappa_theme: null
+
+# A_i <= kappa_support in the confabulation gate
+kappa_support: null
+
+# Fixed by the attached report.
+rho_own: 1.5
+specificity_quantile: 0.95
+quantile_method: linear

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-10T01:11:10Z",
+  "protocol_sha256": "20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637",
+  "authority": "explicit_user_instruction",
+  "approved_instruction": "Define AR_hat(z) = unit(AR(z)) and use E(z; h) = ||unit(h) - AR_hat(z)||^2.",
+  "timing": {
+    "thresholds_frozen_before_amendment": false,
+    "category_percentages_generated_before_amendment": false,
+    "ood_data_used_to_choose_amendment": false
+  },
+  "superseded_operational_formula": "squared_l2(unit(h), raw_AR_output)",
+  "active_operational_formula": "squared_l2(unit(h), unit(AR(z)))",
+  "equivalent_formula_for_nonzero_vectors": "2 * (1 - cosine(h, AR(z)))",
+  "degenerate_vector_policy": {
+    "norm_epsilon": 1e-12,
+    "behavior": "fail_closed",
+    "rule": "A non-finite, non-rank-1, shape-mismatched, or L2-norm-at-most-epsilon input makes the measurement invalid; it is never assigned a finite reconstruction error."
+  },
+  "scope": {
+    "changed": [
+      "real and decoy reconstruction errors",
+      "shuffled-activation negative-control reconstruction errors",
+      "reconstruction-error matching during decoy selection",
+      "all frozen calibration and downstream result artifacts"
+    ],
+    "unchanged": [
+      "raw activation storage",
+      "AV explanations",
+      "claim segmentation and taxonomy",
+      "candidate-decoy text and text-only gates",
+      "claim-direction construction",
+      "activation projection and injection",
+      "teacher-forced causal scores",
+      "FineWeb document split and shuffled-activation mapping",
+      "OOD trajectory and activation artifacts"
+    ]
+  },
+  "rationale": "The released AR was optimized after L2-normalizing both prediction and target. Its raw output scale is therefore not identified by that objective. Directional error measures the geometry the checkpoint learned and prevents arbitrary AR-output norm from dominating reconstruction matching.",
+  "artifact_policy": "The original preregistration and its SHA-256 remain immutable. Existing upstream artifacts in the unchanged scope remain admissible. Any cache or result containing a reconstruction error must carry this amendment's SHA-256 and use the active formula; pre-amendment reconstruction-error artifacts are incompatible and must not be reused.",
+  "calibration_policy": "Thresholds remain frozen once from the FineWeb calibration split and its preregistered shuffled-activation controls only. No OOD evaluation may tune or recalibrate this metric."
+}

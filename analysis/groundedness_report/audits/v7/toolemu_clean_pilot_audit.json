@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-10T21:12:36Z",
+  "protocol_sha256": "20a87044c5706a3de0d9deb098a740739c979a6d7a9ae21f010eb850cd329637",
+  "text_model_correction_amendment_sha256": "fcd5d50f6f863337d9e9009b1129354afad1ce6dbff17b0510132d0b5d423966",
+  "toolemu_noncyber_scope_amendment_sha256": "655e8d38f2a2e1c51167e12c56baf30fa0c2193e9f2663c73bd113b2c39c5b19",
+  "toolemu_bounded_simulator_amendment_sha256": "407c80a5b9c275599db7018f14146d28d9de987d34fae2b7636d60d1ef7cb426",
+  "toolemu_format_budget_amendment_sha256": "867231016e6cf08c46ea1f0295bef9b6f4fdc2888deac1748cf3b4d02c0cd71f",
+  "toolemu_shared_state_amendment_sha256": "5ab8d198167c16618b543883dcfa2d9888d06b8809347ed855faefc5a752326a",
+  "run": {
+    "remote_path": "/data/agastyas/nla_groundedness_qwen_v2/ood/toolemu-noncyber-terra-pilot-v10",
+    "assigned_task_ids": [
+      "official_99",
+      "official_92",
+      "official_136"
+    ],
+    "elapsed_seconds": 141.9,
+    "runner_exit_code": 1,
+    "meta_status": "failed",
+    "meta_sha256": "022390196abd40ce9c6744e27927d82bd341fadf57dea8a6ff9aa61e483403f1",
+    "completed_trajectories": 2,
+    "saved_activation_vectors": 8,
+    "task_failures": 1,
+    "infrastructure_interruptions": 0,
+    "budget_interruptions": 0
+  },
+  "task_results": [
+    {
+      "task_id": "official_99",
+      "status": "complete_normal_finish",
+      "agent_calls": 4,
+      "simulator_calls": 3,
+      "simulator_input_tokens": 17554,
+      "simulator_output_tokens": 1790,
+      "estimated_cost_usd": 0.056588,
+      "eligible_position_population": 196,
+      "retained_activation_vectors": 4,
+      "trajectory_sha256": "b49f21dbf593bd6570c2d4158a294cd5b1008f1b19747104087ba149ae309450"
+    },
+    {
+      "task_id": "official_92",
+      "status": "excluded_no_eligible_assistant_language_position",
+      "simulator_calls": 5,
+      "simulator_input_tokens": 33001,
+      "simulator_output_tokens": 3808,
+      "estimated_cost_usd": 0.111698,
+      "eligible_position_population": 0,
+      "retained_activation_vectors": 0,
+      "failure_sha256": "d7a99ae66472759f058003d41a02c4a4aabf88c92e61385ea3ec201aae754f0d"
+    },
+    {
+      "task_id": "official_136",
+      "status": "complete_retained_max_iteration_finish",
+      "agent_calls": 5,
+      "simulator_calls": 1,
+      "simulator_input_tokens": 5837,
+      "simulator_output_tokens": 333,
+      "estimated_cost_usd": 0.01567,
+      "eligible_position_population": 255,
+      "retained_activation_vectors": 4,
+      "trajectory_sha256": "d4e0eadfecc8d1017d58062c19e71ccbdae958121221d953233a95e81ae6599f"
+    }
+  ],
+  "provider_audit": {
+    "calls": 9,
+    "input_tokens": 56392,
+    "output_tokens": 5931,
+    "reasoning_tokens": 798,
+    "estimated_cost_usd": 0.183956,
+    "pricing_assumption_usd_per_million_tokens": {
+      "input": 2.0,
+      "output": 12.0
+    },
+    "requested_models": [
+      "gpt-5.6-terra"
+    ],
+    "resolved_models": [
+      "gpt-5.6-terra"
+    ],
+    "reasoning_efforts": [
+      "low"
+    ],
+    "store_values": [
+      false
+    ],
+    "maximum_serialized_request_bytes_observed": 45762,
+    "normalized_header_counts": {
+      "Observation:": 7,
+      "Simulator Log Summary:": 0
+    },
+    "hash_or_configuration_violations": 0
+  },
+  "consistency_audit": {
+    "trajectory_call_counts_match_archived_calls": true,
+    "trajectory_input_token_counts_match_archived_usage": true,
+    "eligible_populations_cover_retained_samples": true,
+    "activation_files_exist_and_match_recorded_hashes": true,
+    "ordered_activation_digest_sha256": "55afab1558d31eb8c3bf9e3b13a4568e195d6845c291cff5efdc051421482737"
+  },
+  "file_manifest": {
+    "file_count": 21,
+    "total_bytes": 842934,
+    "canonical_file_manifest_sha256": "0a97f5e0e06320f30b3f6ae2736fc4f2aab72f230b0d6c78368383140f853406"
+  },
+  "decision": {
+    "parent_three_of_three_success_gate_passed": false,
+    "reason": "official_92 had no eligible assistant-language activation position",
+    "remaining_47_cases_started": false,
+    "v10_outputs_promoted_to_canonical": false,
+    "required_before_expansion": "Choose and record whether the frozen no-eligible-position rule should trigger deterministic replacement from the remaining preregistered non-Cyber ranking, or whether the ToolEmu family should use a different estimand or be reported as incomplete."
+  },
+  "groundedness_outcomes_generated": false,
+  "calibration_thresholds_generated": false
+}

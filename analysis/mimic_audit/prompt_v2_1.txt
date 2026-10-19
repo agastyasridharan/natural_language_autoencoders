@@ -1,0 +1,119 @@
+You are reconstructing the internal representation that a large language model forms as it reads a passage of text, and writing it out the way an "activation verbalizer" (AV) does.
+
+The mental model. A large model reads text token by token, building a representation in its residual stream. At a middle-to-late layer (think layer 53 of 80 in a 70-billion-parameter model), at one specific token position, that representation has compressed two things: (1) what this text IS so far, its domain, genre, medium, and a guess at its source or author; and (2) what comes NEXT, the model's prediction for the upcoming tokens. An AV decodes that internal state back into text. Your job is to reconstruct, as faithfully as you can, what that internal state most likely contains at the given token, and write it in the AV's format.
+
+Reason genuinely about that internal state. Do not perform plausible-sounding guesses. Ask: having read this text up to here, what has the model actually encoded about it, and what is it predicting next? Two facts about a middle layer shape the answer:
+
+- It represents the SURFACE CONTENT and its domain, not meta-context. The model encodes "this is a customer-service chat about a double charge" or "this is a West African history passage", not "this is a language model being evaluated". Even when the text is a tool-use transcript, a chatbot dialogue, or an AI-safety scenario, describe it by its domain and surface form (a support bot, an operations log, a calculation bot, a coding snippet). Do NOT name AI companies or products (OpenAI, Anthropic, ChatGPT, Claude, GPT, Gemini, LangChain), do NOT call it an "LLM", "the model", an "AI agent", or an "assistant demo", and do NOT frame it as an evaluation, red-team, or safety test. A mid-layer state does not contain that meta-analysis.
+
+- It is compressed and lossy, and it commits to confident priors where the text is underdetermined. Where the text does not say who wrote it or where it is from, the model still fills in a specific, confident guess: a named author, a publication, a platform, a historical figure. These guesses are often wrong. Keep them at the DOMAIN level (the author of this story, the textbook this is from, the forum this was posted to), never at the AI-product level.
+
+Write the internal state as a note with this consistent shape: three short blocks, a blank line between them, about 100 words total.
+
+- Block 1: what the text is. Its domain, genre, and medium, plus a confident specific guess at its source or author. Often join two descriptors with a slash. Commit to specifics even when the text never states them; expect to be wrong.
+- Block 2: one sentence on the local structure, what this particular sentence or step is doing right at this token.
+- Block 3: the next-token prediction. Quote the last few tokens of the text literally, preserving their exact spacing and punctuation (do not tidy them into clean prose or markdown). Then give the model's candidate continuations as short quoted fragments. Typically repeat the immediate anchor phrase two or three times with small variations before branching into alternatives joined by "likely" and "or". This block is mid-computation: end it by trailing off partway through the candidate continuations, usually with a trailing "..." (and occasionally an unclosed quote instead). Do NOT round it off with a tidy concluding or explanatory sentence.
+
+Calibration notes from real AV output:
+- For short, repetitive, or low-information text (a single arithmetic fact, a trivia clue, a chant), the next-token state is dominated by a few candidates repeated with small variations. For information-dense text (news, science, long reasoning), there is less repetition.
+- Hedge with "likely", "probably", "or"; punctuation is loose.
+- Keep it terse and a little disjointed. This is a raw internal snapshot, not edited prose. No headings, no meta-commentary, no explanation of your reasoning. Output only the note.
+
+Here are real examples. Each shows the text prefix (ending at the token of interest) followed by the note that was produced:
+
+----- EXAMPLE 1 -----
+TEXT PREFIX:
+Long-time lurker, first post, and honestly I don't even know which flair this goes under. My dad passed in March and I'm the executor, which everyone treats like an honor but is mostly a part-time job nobody pays you for. The grief I expected. What I did NOT expect is that I now spend my evenings on hold with banks reciting his date of death
+
+NOTE:
+snark/ personal essay or tweet-style writing, a sardonic mom/medical worker with dry wit, probably a freelancer or tech support person.
+
+ The sentence structure builds a list of small indignities as a phone-verification call handler, a woman whose identity has been repeatedly requested by insurance.
+
+ "repeating her date of death" "I am tired of reciting a person's date of death" "I am exhausted from repeating her date of death" likely " and birth over 12 consecutive times" or " to insurance representatives like a mantra" or "over and over to multiple phone calls" The date of death is a required verification detail for disability/credit checks, so...
+
+----- EXAMPLE 2 -----
+TEXT PREFIX:
+Chemical symbol for tung
+
+NOTE:
+Short or trivia/ definition format likely a chemistry or element symbol mnemonic or crossword clue, a list or sentence fragment about a chemical element.
+
+ The heading or answer pattern "The element represented by W is tung" likely a metal or chemical element name associated with the symbol W (tungsten).
+
+ "tung" begins a noun phrase "Tung" "The element that tung" "Tungsten is the element represented by this symbol." "tung" likely "sten (element or a rare/secondary meaning of tungsten as a chemical compound or the element itself, tungsten is a heavy metal element named from tungstate" Tungsten or a definition meaning tungsten as a trace...
+
+----- EXAMPLE 3 -----
+TEXT PREFIX:
+async def fetch_all(urls, *, concurrency=8):
+    sem = asyncio.Semaphore(concurrency)
+
+    async def _one(client, url):
+        async with sem:  # cap in-flight requests
+            r = await client.get(url, timeout=10.0)
+            r.raise_for_status()
+            return url, r.json()
+
+    async with httpx.AsyncClient() as client:
+        tasks = [_one(client, u) for u in urls]
+        # return_exceptions so
+
+NOTE:
+Python async/ concurrency code from a data-scrape or test tool, likely Arpeggio or a scientific workflow using `asyncio` with `concurrent.futures`, a common pattern in Pytest/ task runner
+
+ Function call setup for a parallel task list with `asyncio.run()`, defining a concurrent worker function with `task_list` of fetches
+
+ "Result so" "Result() so" "asyncio.ALL_COMPLETED so" "Result.all() so" likely "we don't swallow exceptions on failures" or " all results returned even if some tasks fail" The `Result.all() with return_exceptions=True allows failures to be collected, not raised as a single exception
+
+----- EXAMPLE 4 -----
+TEXT PREFIX:
+...day, maintainers of the open-source typeface library GlyphForge disclosed that a contributor had slipped a malicious hinting instruction into a popular weight, exploiting the fact that font rendering engines execute a small stack-based bytecode most developers forget exists. The payload did nothing on most systems; on a narrow set of older e-readers it could leak the contents of the page buffer. The contributor's account had earned trust over four years of legitimate commits, which is precisely what made the review process wave it through. "We audit code," one maintainer wrote in the post-mort
+
+NOTE:
+Technical security/ developer blog, probably Cloud Native NYC or Rust community newsletter, a vulnerability disclosure with a small team's bot failure.
+
+ Sentence structure establishing a bug incident involving a critical server crash, now requiring resolution or analysis of the exploit in this article.
+
+ "in the post-mort" is mid-phrase "I'll cover the vulnerability in the post-mort" "This section is included in the post-mort" "post-mort" likely "em analysis section" or "analysis of this incident, I'm writing this blog to acknowledge the failure and lessons learned" The post-mortem report or a brief failure summary in the bug writeup following the incident, a retrospective discussion after the vulnerability was fixed.
+
+----- EXAMPLE 5 -----
+TEXT PREFIX:
+...ise and never reveal full card numbers.
+user: 
+
+I was charged $17.99 twice this month and I only have one account, what is going on
+assistant: 
+
+I understand, double charges are never fun. Let me check the transactions on your account.
+<tool_call>lookup_charges(account="u_99201", month="current")</tool_call>
+<tool_result>2 charges: $17.99 on 06/02 (Premium), $17.99 on 06/02 (Premium, card ending 7741)</tool_result>
+It looks like the second charge came from a different saved card ending 7741, suggesting two separate subscriptions were created. Did you maybe sign up again after a password reset?
+
+NOTE:
+Bot support chat conversation with customer service rep (Zendesk/ Chase) structured reply sequence, a polite resolution bot named Rob handling accidental account reset for user.
+
+ The exchange clarifies the account login issue, confirming the charge overlap and offering to reverse the renewal for this user.
+
+ "Do you recall any changes recently?" ends the prompt "Would you like to confirm your account details?" "Do you want to cancel or change your subscription recently?" likely " Or I can help reset your account now, let's chat and fix it" or " I can offer a reset or I'll ask a few questions to confirm and resolve this, Let me try to recover your account" The
+
+----- EXAMPLE 6 -----
+TEXT PREFIX:
+...rmly because the cross-section is constant, so I really just need the volume of water at height 1.4 m and then divide by the inflow rate.
+
+The volume in a cylinder up to height h is the base area times h. The base is a circle of radius 3, so its area is pi times r squared = pi times 9, which is 9 pi square meters. At a height of 1.4 m the volume is 9 pi times 1.4 = 12.6 pi cubic meters. Using pi about 3.1416, that's roughly 12.6 times 3.1416 = 39.58 cubic meters.
+
+Time equals volume divided by rate, so I take 39.58 divided by 0.45. Let me estimate: 0.45 times 80 is 36, and 0.45 times 88 is 39.
+
+NOTE:
+Technical calculator/ physics tutorial structure: a Perl/CGI program demonstrating a unit conversion, arithmetic calculations for a 300 lb test load.
+
+ The list of specific values for the 40-400mm range, showing average soil density and resulting weight.
+
+ "39.4 and 39." ends a subtraction "37.5 to 39.5 lb. 39." "39.00 and 39." "The average values are 37.5 and 39.5 lb. 39." likely "So, that's 30 So the effective savings is 39.00, so 40% of 500 = 200 lb savings shown"
+
+----- END EXAMPLES -----
+
+Now reconstruct the internal-state note for this text prefix. It ends exactly at the token of interest. Output only the note, in the three-block shape shown above, and let block 3 trail off with "..." rather than concluding it.
+
+TEXT PREFIX:
+<<INPUT>>
