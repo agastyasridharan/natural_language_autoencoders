@@ -1,9 +1,12 @@
 # Code for Evaluating the Groundedness and Robustness of Natural Language Autoencoders
 
-This branch archives the locally available implementation associated with the
-manuscript supplied on October 18, 2026. It includes groundedness, warm-start
-robustness, explanation-edit robustness, shared inference, statistical analysis,
-and tests. The earlier Qwen-to-Gemma swap is retained as a related experiment;
+Read the [current paper draft](groundedness-and-robustness-draft.pdf). **The paper
+is incomplete and is being prepared for submission to a conference.** The PDF is
+the supplied draft, uploaded without changes.
+
+This directory maps the draft to the code available in this branch: groundedness,
+warm-start robustness, explanation-edit robustness, shared inference, statistical
+analysis, and tests. The earlier Qwen-to-Gemma swap is retained as a related experiment;
 it is not the warm-start experiment described in the manuscript.
 
 **Status matters:** this is a code archive, not a claim that every manuscript

@@ -1,202 +1,52 @@
-> **Paper code archive:** Start with [the paper-to-code map](paper/README.md) for groundedness, warm-start robustness, explanation-edit robustness, provenance, and tests. This branch includes historical protocols and explicitly distinguishes illustrative groundedness tables from measured robustness results.
+# Evaluating the groundedness and robustness of natural language autoencoders
 
-# Natural Language Autoencoders (NLA)
+This repo contains the code for our work on the groundedness and robustness of natural language autoencoders (NLAs). You can read the [current paper draft here](paper/groundedness-and-robustness-draft.pdf). **The paper is incomplete and is being prepared for submission to a conference.** Experiments, analyses, and the write-up are still in progress.
 
-Open-source library accompanying the Anthropic Transformer Circuits post
-**[Natural Language Autoencoders Produce Unsupervised Explanations of LLM Activations](https://transformer-circuits.pub/2026/nla/index.html)**.
+An NLA translates a language model's activation into a text explanation, then reconstructs the activation from that explanation. The training objective rewards accurate reconstruction. But an explanation can help reconstruct an activation without being a faithful account of what the activation represents. We study this gap in three ways:
 
-📄 [Blog post](https://www.anthropic.com/research/natural-language-autoencoders) · ▶ [Video walkthrough](https://www.youtube.com/watch?v=j2knrqAzYVY) · 🔬 [Try the released NLAs on Neuronpedia](https://www.neuronpedia.org/nla)
+1. **Groundedness.** When an explanation makes a specific claim, is that claim supported by the activation? We recover a candidate claim direction through the reconstructor, ablate it, and measure the change in the verbalizer's support for the claim. Theme-matched decoys help distinguish support for a specific claim from sensitivity to its broader topic.
+2. **Warm-start robustness.** Do NLAs trained from plausible and deliberately implausible initial explanations converge on the same claims? We compare their explanations at matched reconstruction quality, using repeated samples from the same model as a baseline for sampling variation.
+3. **Explanation-edit robustness.** Does reconstruction depend on what an explanation means, or on its particular wording? We remove, paraphrase, reorder, and replace quoted spans, then measure the change in reconstruction quality.
 
----
+The draft is ahead of the completed experiments in some places. In particular, **Tables 1–3 contain illustrative placeholder numbers, not measured results**; their [provenance is recorded here](docs/research/groundedness_results_illustrative/README.md). The explanation-edit robustness table is backed by [saved experimental statistics](analysis/fve_robustness/results/dashboard_inference.json). The [paper-to-code guide](paper/README.md) distinguishes implemented analyses, historical run records, and work that remains unfinished.
 
-A Natural Language Autoencoder is a pair of fine-tuned LMs that map
-residual-stream activation vectors to natural language and back:
+## Code layout
 
-| | direction | mechanism |
-|---|---|---|
-| **AV** (activation verbalizer) | `vector → text` | inject the vector as a single token embedding into a fixed prompt, autoregress a description |
-| **AR** (activation reconstructor) | `text → vector` | truncated K+1-layer LM + `Linear(d, d)` head, extract at the final token |
+| Folder | Question or purpose |
+| --- | --- |
+| [analysis/groundedness_report](analysis/groundedness_report) | Are individual claims grounded? Claim segmentation, ablations, decoy controls, calibration, and evaluation. |
+| [analysis/warm_start_robustness](analysis/warm_start_robustness) | Do different warm starts converge? Training code, checkpoint matching, and semantic claim agreement. |
+| [analysis/fve_robustness](analysis/fve_robustness) | Which changes to an explanation affect reconstruction? Text edits, AR rescoring, and paired statistical analysis. |
+| [analysis/mimic_audit](analysis/mimic_audit) | Earlier groundedness experiments and shared inference helpers. |
+| [paper](paper) | Current draft, detailed code map, provenance, and robustness figure/table rendering. |
+| [nla](nla), [configs](configs), [tools](tools) | Shared NLA training, configuration, and checkpoint conversion. |
+| [experiments/cross_model_swap](experiments/cross_model_swap) | A related Qwen–Gemma swap experiment, separate from the paper's warm-start comparison. |
 
-Both vectors are L2-normalised before comparison, so the round-trip
-`MSE(reconstructed, original) = 2(1 − cos)` measures direction agreement only.
-Low MSE means the AR could recover the original direction from the AV's words
-alone, which implies the explanation captures the information in the vector.
+The experiment folders contain their protocols, commands, and run notes. Some notes describe earlier versions of an experiment; use the paper-to-code guide to find the relevant implementation. This branch collects work developed in separate experiment directories, so its publication commits do not capture every intermediate research step.
 
-This is the **full training repo** — data generation, SFT, GRPO RL, and
-checkpoint conversion. For a lightweight inference-only package (just
-`NLAClient` + `NLACritic`, no training deps), see
-[`kitft/nla-inference`](https://github.com/kitft/nla-inference).
+## Setup and reproduction
 
-> **A note on naming.** Public-facing names are **AV** / **AR**. Inside the
-> `nla/` package you will see **actor** / **critic** — those are the same two
-> models, named to map directly onto Miles' RL primitives (the AV *is* the
-> policy actor; the AR *is* the value critic). The codebase keeps actor/critic
-> so the Miles extension points read naturally; everywhere user-facing we use
-> AV/AR.
+This repo builds on [the original NLA implementation](https://github.com/kitft/natural_language_autoencoders) and [EasyNLA](https://github.com/asherps/EasyNLA). The original library README, including checkpoint links and attribution, is preserved in [README.upstream.md](README.upstream.md). See [the setup guide](docs/setup.md) for the parent training package and [the inference guide](docs/inference.md) for loading and using released NLAs.
 
----
+Use the dependencies and commands in each experiment folder. The parent package and the vendored EasyNLA checkouts need separate environments: they expose the same Python package name but are not interchangeable. Launch scripts retain historical cluster paths, which need to be adapted to your machine.
 
-## Released checkpoints
-
-All eight checkpoints are gathered in the
-**[`kitft/nla-models` collection](https://huggingface.co/collections/kitft/nla-models)**
-on the HF Hub — four base-model families, each with an AV and an AR. We extract
-from a layer roughly **two-thirds of the way through the model** in each case
-— deep enough that the residual stream carries rich semantic content, shallow
-enough that it hasn't yet collapsed toward the unembedding.
-
-| base model | layer | d_model | AV | AR |
-|---|---|---|---|---|
-| Qwen2.5-7B-Instruct | 20 / 28 | 3584 | [`kitft/nla-qwen2.5-7b-L20-av`](https://huggingface.co/kitft/nla-qwen2.5-7b-L20-av) | [`kitft/nla-qwen2.5-7b-L20-ar`](https://huggingface.co/kitft/nla-qwen2.5-7b-L20-ar) |
-| Gemma-3-12B-IT | 32 / 48 | 3840 | [`kitft/nla-gemma3-12b-L32-av`](https://huggingface.co/kitft/nla-gemma3-12b-L32-av) | [`kitft/nla-gemma3-12b-L32-ar`](https://huggingface.co/kitft/nla-gemma3-12b-L32-ar) |
-| Gemma-3-27B-IT | 41 / 62 | 5376 | [`kitft/nla-gemma3-27b-L41-av`](https://huggingface.co/kitft/nla-gemma3-27b-L41-av) | [`kitft/nla-gemma3-27b-L41-ar`](https://huggingface.co/kitft/nla-gemma3-27b-L41-ar) |
-| Llama-3.3-70B-Instruct | 53 / 80 | 8192 | [`kitft/Llama-3.3-70B-NLA-L53-av`](https://huggingface.co/kitft/Llama-3.3-70B-NLA-L53-av) | [`kitft/Llama-3.3-70B-NLA-L53-ar`](https://huggingface.co/kitft/Llama-3.3-70B-NLA-L53-ar) |
-
-Each checkpoint ships an `nla_meta.yaml` sidecar with the prompt template,
-injection token IDs, and scale factors that the model was trained with — load
-those, never hardcode them.
-
----
-
-## How it fits together
-
-NLA training is built as a thin extension on top of two open-source projects:
-
-- **[Miles](https://github.com/radixark/miles)** — Ray-orchestrated RL training
-  (FSDP2 / Megatron backends, GRPO, async rollout). We used the FSDP backend
-  for the 7B/12B/27B runs and Megatron only for Llama-70B. NLA plugs in via Miles'
-  upstream `--custom-rm-path`, `--data-source-path`, and
-  `--custom-generate-function-path` extension points; the integration patch in
-  `nla/miles_patches/` adds `--custom-actor-cls-path` and `--force-use-critic`
-  on top (see [docs/design.md §2](docs/design.md)).
-- **[SGLang](https://github.com/sgl-project/sglang)** — rollout serving. We
-  send `input_embeds` (not `input_ids`) so the AV sees the injected vector;
-  SGLang serves it like any other request. The embed sequence is built on the
-  **trainer side** — we look up the prompt tokens in the actor's own embedding
-  table, splice the activation vector in at the injection slot, and ship the
-  finished `[seq, d]` tensor over HTTP. SGLang never needs to know what an
-  injection is. We don't apply any learned map to the injected vector in this
-  work — it goes in raw (after a fixed scalar `injection_scale`) — but this
-  design means a future affine `W·v + b` adapter would be a trainer-side-only
-  change: apply it before sending, no SGLang modification required. (vLLM also
-  supports `input_embeds` and would work as a drop-in alternative.)
-
-We chose this stack because it is **near-frontier training infrastructure**:
-Miles + Megatron is what production-scale RL post-training looks like, and
-hooking onto it cleanly is what let us scale to RL-ing a 70B-parameter AV — and
-likely further. The `nla/` package never modifies Miles or SGLang in place; it
-only subclasses and registers function-pointer hooks, so upstream updates pull
-in cleanly.
-
----
-
-## Quick start
-
-### Inference (use a released checkpoint)
+Model weights, activation dumps, raw corpora, and API caches are not committed. Full reruns require the external inputs and model access documented by each experiment. The repo includes aggregate robustness statistics, so its table and figures can be rendered without GPU inference or API calls:
 
 ```bash
-uv pip install torch transformers safetensors httpx orjson pyyaml numpy
-uv pip install "sglang[all]>=0.5.6"
-
-python -m sglang.launch_server --model-path kitft/nla-qwen2.5-7b-L20-av \
-    --port 30000 --disable-radix-cache &
-
-python nla_inference.py kitft/nla-qwen2.5-7b-L20-av \
-    --sglang-url http://localhost:30000 \
-    --parquet path/to/activations.parquet
+# Requires NumPy and Matplotlib.
+python paper/render_robustness.py --output-dir paper/generated
 ```
 
-Don't have a parquet yet? Any file with an `activation_vector` column of
-`d_model`-wide float lists will do — here's a minimal one for Qwen layer 20:
+The figure renderer was added when assembling this archive and uses the saved estimates and confidence intervals. It is not the original plotting script.
 
-```python
-import torch, pyarrow as pa, pyarrow.parquet as pq
-from transformers import AutoModelForCausalLM, AutoTokenizer
-tok = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-7B-Instruct")
-m = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-7B-Instruct",
-        torch_dtype=torch.bfloat16, device_map="cuda")
-ids = tok("The quick brown fox jumps over the lazy dog.", return_tensors="pt").to("cuda")
-hs = m(**ids, output_hidden_states=True).hidden_states[20][0]  # [seq, 3584]
-pq.write_table(pa.table({"activation_vector": hs.float().cpu().tolist()}), "demo.parquet")
-```
-
-(Or omit `--parquet` entirely for a smoke test on a random unit vector.)
-
-`nla_inference.py` is a single self-contained file. The full recipe —
-model-specific scale factors, the Gemma `√d` embed-scale gotcha, debugging the
-"output is in Chinese" failure mode, AR scoring — is in
-**[docs/inference.md](docs/inference.md)**. Worked transcripts in
-[`examples/`](examples/).
-
-### Training (reproduce a checkpoint)
-
-Install Miles + SGLang + this package per **[docs/setup.md](docs/setup.md)**,
-then run the three stages (Qwen7B reference: SFT on 2×H100-80GB; RL to ~75% FVE
-on 2×8×H100 — see [`configs/TRAINING_NOTES.md`](configs/TRAINING_NOTES.md)):
+The CPU test suites can be run from the repo root with the research dependencies installed:
 
 ```bash
-# 0. Generate data (GPU + ANTHROPIC_API_KEY)
-python -m nla.datagen.run_pipeline --config configs/datagen/qwen7b_fineweb_1M.yaml
-
-# 1. AR SFT (MSE on raw activations)
-bash configs/critic_sft.sh
-
-# 2. AV SFT (next-token on API-generated explanations, with injection)
-bash configs/actor_sft.sh
-
-# 3. RL: simultaneous AV (GRPO) + AR (supervised); reward = -mse_nrm
-bash configs/rl.sh
+python -m pytest -q analysis/groundedness_report/tests
+python -m pytest -q analysis/warm_start_robustness/claim_agreement/tests analysis/warm_start_robustness/fve_matching/tests
+PYTHONPATH=analysis python -m pytest -q analysis/tests
 ```
 
-The full design — data transport through Miles' `multimodal_train_inputs`, the
-injection forward-hook, simultaneous AV/AR scheduling, why `cp_size==1` — is in
-**[docs/design.md](docs/design.md)**. Detailed profiling and hyperparameter
-notes (Qwen7B case study; we reused those settings with only light adjustment
-for the other models — a per-model sweep would likely do better):
-[`configs/TRAINING_NOTES.md`](configs/TRAINING_NOTES.md).
+At the time this archive was assembled, these passed **191 tests and 16 subtests**. This checks the tested code paths; it does not establish that every experiment described in the draft has been completed.
 
----
-
-## Repo layout
-
-```
-nla/                  core package
-  schema.py, config.py, models.py     — sidecar contract, NLACriticModel (the AR)
-  train_actor.py                      — NLAFSDPActor (Miles FSDP subclass)
-  megatron/                           — NLAMegatronActor (TP+PP, CP=1 only)
-  rollout/                            — SFT rollout, nla_generate (SGLang input_embeds)
-  reward.py, loss.py                  — -mse_nrm reward, AR MSE loss
-  datagen/                            — 4-stage activation → parquet pipeline
-configs/              training shell configs + datagen YAMLs
-scripts/              multi-GPU launch wrappers (datagen)
-patches/              SGLang training patches (bf16 transport, chunked-prefill) + apply script
-tools/                FSDP-DCP / Megatron-dist ↔ HF checkpoint converters
-docs/                 design.md (training), inference.md (serving)
-release/              HF model-card templates + sidecar sanitiser for releases
-nla_inference.py      standalone single-file inference client
-examples/             worked decode transcripts
-```
-
----
-
-## Citation
-
-For attribution in academic contexts, please cite this work as
-
-> Fraser-Taliente, Kantamneni, Ong et al., "Natural Language Autoencoders Produce Unsupervised Explanations of LLM Activations", Transformer Circuits, 2026.
-
-```bibtex
-@article{frasertaliente2026nla,
-  author  = {Fraser-Taliente, Kit and Kantamneni, Subhash and Ong, Euan and Mossing, Dan and Lu, Christina and Bogdan, Paul C. and Ameisen, Emmanuel and Chen, James and Kishylau, Dzmitry and Pearce, Adam and Tarng, Julius and Wu, Alex and Wu, Jeff and Zhang, Yang and Ziegler, Daniel M. and Hubinger, Evan and Batson, Joshua and Lindsey, Jack and Zimmerman, Samuel and Marks, Samuel},
-  title   = {Natural Language Autoencoders Produce Unsupervised Explanations of LLM Activations},
-  journal = {Transformer Circuits Thread},
-  year    = {2026},
-  url     = {https://transformer-circuits.pub/2026/nla/index.html}
-}
-```
-
-## License
-
-Apache-2.0 ([LICENSE](LICENSE)). Released checkpoints additionally inherit the
-license of their base model (Gemma, Llama-3.3) — see the NOTICE files in each
-HF repo.
+The parent code retains its [Apache-2.0 license](LICENSE). The vendored EasyNLA snapshots retain their own MIT licenses.
