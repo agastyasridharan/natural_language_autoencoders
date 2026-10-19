@@ -1,0 +1,216 @@
+{
+  "phase": "paused",
+  "utc": "2026-10-05T04:52:10.554919+00:00",
+  "checkpoint_step": 200,
+  "total_updates": 2100,
+  "snapshot": "/data/agastyas/nla_cross_model_swap/pause_snapshots/step_000200",
+  "log": "logs/rl_restart_20261005T015223Z.log",
+  "optimizer_summary": {
+    "actor_optim": {
+      "parameter_count": 588,
+      "populated_states": 588
+    },
+    "critic_optim": {
+      "parameter_count": 354,
+      "populated_states": 354
+    }
+  },
+  "tensor_counts": {
+    "iter_000200/adapter_model.safetensors": 588,
+    "iter_000200/reference/adapter_model.safetensors": 588,
+    "critic_latest/model-00001-of-00003.safetensors": 84,
+    "critic_latest/model-00002-of-00003.safetensors": 141,
+    "critic_latest/model-00003-of-00003.safetensors": 128,
+    "critic_latest/value_head.safetensors": 1
+  },
+  "last_completed_per_rank": [
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200,
+    200
+  ],
+  "updates_after_checkpoint": 0,
+  "stopped_processes": [
+    {
+      "pid": 2936615,
+      "ppid": 2936612,
+      "start": "110266499",
+      "state": "S",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -m torch.distributed.run --standalone --nproc-per-node=8 -m nla.train_rl_vllm --base-ckpt /data/agastyas/nla_cross_model_swap/checkpoints/gemma2-base --av-ckpt /data/agastyas/nla_cross_model_swap/av_merged --av-adapter /data/agastyas/nla_cross_model_swap/sft_av/iter_0001411 --ar-ckpt /data/agastyas/nla_cross_model_swap/sft_ar/iter_0001427 --rl-parquet /data/agastyas/nla_cross_model_swap/data/rl.parquet --eval-parquet /data/agastyas/nla_cross_model_swap/data/av_val.parquet --sidecar /data/agastyas/nla_cross_model_swap/data/rl.parquet --save-dir /data/agastyas/nla_cross_model_swap/rl --num-steps 2100 --batch-prompts 256 --group-size 8 --max-new-tokens 256 --attn-implementation eager --lr 1e-4 --critic-lr 8e-5 --train-critic --gradient-checkpointing --logp-micro-batch 4 --critic-micro-batch 8 --vllm-gpu-mem 0.30 --vllm-tp 1 --vllm-max-len 1024 --ipc-weight-sync --vllm-max-num-seqs 128 --vllm-max-batched-tokens 4096 --evals base_fve --eval-every 50 --eval-n-prompts 128 --save-every 100 --assert-param-sync --seed 42 --no-wandb "
+    },
+    {
+      "pid": 2936739,
+      "ppid": 2936615,
+      "start": "110266959",
+      "state": "S",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -u -m nla.train_rl_vllm --base-ckpt /data/agastyas/nla_cross_model_swap/checkpoints/gemma2-base --av-ckpt /data/agastyas/nla_cross_model_swap/av_merged --av-adapter /data/agastyas/nla_cross_model_swap/sft_av/iter_0001411 --ar-ckpt /data/agastyas/nla_cross_model_swap/sft_ar/iter_0001427 --rl-parquet /data/agastyas/nla_cross_model_swap/data/rl.parquet --eval-parquet /data/agastyas/nla_cross_model_swap/data/av_val.parquet --sidecar /data/agastyas/nla_cross_model_swap/data/rl.parquet --save-dir /data/agastyas/nla_cross_model_swap/rl --num-steps 2100 --batch-prompts 256 --group-size 8 --max-new-tokens 256 --attn-implementation eager --lr 1e-4 --critic-lr 8e-5 --train-critic --gradient-checkpointing --logp-micro-batch 4 --critic-micro-batch 8 --vllm-gpu-mem 0.30 --vllm-tp 1 --vllm-max-len 1024 --ipc-weight-sync --vllm-max-num-seqs 128 --vllm-max-batched-tokens 4096 --evals base_fve --eval-every 50 --eval-n-prompts 128 --save-every 100 --assert-param-sync --seed 42 --no-wandb "
+    },
+    {
+      "pid": 2936740,
+      "ppid": 2936615,
+      "start": "110266959",
+      "state": "S",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -u -m nla.train_rl_vllm --base-ckpt /data/agastyas/nla_cross_model_swap/checkpoints/gemma2-base --av-ckpt /data/agastyas/nla_cross_model_swap/av_merged --av-adapter /data/agastyas/nla_cross_model_swap/sft_av/iter_0001411 --ar-ckpt /data/agastyas/nla_cross_model_swap/sft_ar/iter_0001427 --rl-parquet /data/agastyas/nla_cross_model_swap/data/rl.parquet --eval-parquet /data/agastyas/nla_cross_model_swap/data/av_val.parquet --sidecar /data/agastyas/nla_cross_model_swap/data/rl.parquet --save-dir /data/agastyas/nla_cross_model_swap/rl --num-steps 2100 --batch-prompts 256 --group-size 8 --max-new-tokens 256 --attn-implementation eager --lr 1e-4 --critic-lr 8e-5 --train-critic --gradient-checkpointing --logp-micro-batch 4 --critic-micro-batch 8 --vllm-gpu-mem 0.30 --vllm-tp 1 --vllm-max-len 1024 --ipc-weight-sync --vllm-max-num-seqs 128 --vllm-max-batched-tokens 4096 --evals base_fve --eval-every 50 --eval-n-prompts 128 --save-every 100 --assert-param-sync --seed 42 --no-wandb "
+    },
+    {
+      "pid": 2936741,
+      "ppid": 2936615,
+      "start": "110266959",
+      "state": "S",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -u -m nla.train_rl_vllm --base-ckpt /data/agastyas/nla_cross_model_swap/checkpoints/gemma2-base --av-ckpt /data/agastyas/nla_cross_model_swap/av_merged --av-adapter /data/agastyas/nla_cross_model_swap/sft_av/iter_0001411 --ar-ckpt /data/agastyas/nla_cross_model_swap/sft_ar/iter_0001427 --rl-parquet /data/agastyas/nla_cross_model_swap/data/rl.parquet --eval-parquet /data/agastyas/nla_cross_model_swap/data/av_val.parquet --sidecar /data/agastyas/nla_cross_model_swap/data/rl.parquet --save-dir /data/agastyas/nla_cross_model_swap/rl --num-steps 2100 --batch-prompts 256 --group-size 8 --max-new-tokens 256 --attn-implementation eager --lr 1e-4 --critic-lr 8e-5 --train-critic --gradient-checkpointing --logp-micro-batch 4 --critic-micro-batch 8 --vllm-gpu-mem 0.30 --vllm-tp 1 --vllm-max-len 1024 --ipc-weight-sync --vllm-max-num-seqs 128 --vllm-max-batched-tokens 4096 --evals base_fve --eval-every 50 --eval-n-prompts 128 --save-every 100 --assert-param-sync --seed 42 --no-wandb "
+    },
+    {
+      "pid": 2936742,
+      "ppid": 2936615,
+      "start": "110266959",
+      "state": "S",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -u -m nla.train_rl_vllm --base-ckpt /data/agastyas/nla_cross_model_swap/checkpoints/gemma2-base --av-ckpt /data/agastyas/nla_cross_model_swap/av_merged --av-adapter /data/agastyas/nla_cross_model_swap/sft_av/iter_0001411 --ar-ckpt /data/agastyas/nla_cross_model_swap/sft_ar/iter_0001427 --rl-parquet /data/agastyas/nla_cross_model_swap/data/rl.parquet --eval-parquet /data/agastyas/nla_cross_model_swap/data/av_val.parquet --sidecar /data/agastyas/nla_cross_model_swap/data/rl.parquet --save-dir /data/agastyas/nla_cross_model_swap/rl --num-steps 2100 --batch-prompts 256 --group-size 8 --max-new-tokens 256 --attn-implementation eager --lr 1e-4 --critic-lr 8e-5 --train-critic --gradient-checkpointing --logp-micro-batch 4 --critic-micro-batch 8 --vllm-gpu-mem 0.30 --vllm-tp 1 --vllm-max-len 1024 --ipc-weight-sync --vllm-max-num-seqs 128 --vllm-max-batched-tokens 4096 --evals base_fve --eval-every 50 --eval-n-prompts 128 --save-every 100 --assert-param-sync --seed 42 --no-wandb "
+    },
+    {
+      "pid": 2936743,
+      "ppid": 2936615,
+      "start": "110266959",
+      "state": "S",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -u -m nla.train_rl_vllm --base-ckpt /data/agastyas/nla_cross_model_swap/checkpoints/gemma2-base --av-ckpt /data/agastyas/nla_cross_model_swap/av_merged --av-adapter /data/agastyas/nla_cross_model_swap/sft_av/iter_0001411 --ar-ckpt /data/agastyas/nla_cross_model_swap/sft_ar/iter_0001427 --rl-parquet /data/agastyas/nla_cross_model_swap/data/rl.parquet --eval-parquet /data/agastyas/nla_cross_model_swap/data/av_val.parquet --sidecar /data/agastyas/nla_cross_model_swap/data/rl.parquet --save-dir /data/agastyas/nla_cross_model_swap/rl --num-steps 2100 --batch-prompts 256 --group-size 8 --max-new-tokens 256 --attn-implementation eager --lr 1e-4 --critic-lr 8e-5 --train-critic --gradient-checkpointing --logp-micro-batch 4 --critic-micro-batch 8 --vllm-gpu-mem 0.30 --vllm-tp 1 --vllm-max-len 1024 --ipc-weight-sync --vllm-max-num-seqs 128 --vllm-max-batched-tokens 4096 --evals base_fve --eval-every 50 --eval-n-prompts 128 --save-every 100 --assert-param-sync --seed 42 --no-wandb "
+    },
+    {
+      "pid": 2936744,
+      "ppid": 2936615,
+      "start": "110266959",
+      "state": "S",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -u -m nla.train_rl_vllm --base-ckpt /data/agastyas/nla_cross_model_swap/checkpoints/gemma2-base --av-ckpt /data/agastyas/nla_cross_model_swap/av_merged --av-adapter /data/agastyas/nla_cross_model_swap/sft_av/iter_0001411 --ar-ckpt /data/agastyas/nla_cross_model_swap/sft_ar/iter_0001427 --rl-parquet /data/agastyas/nla_cross_model_swap/data/rl.parquet --eval-parquet /data/agastyas/nla_cross_model_swap/data/av_val.parquet --sidecar /data/agastyas/nla_cross_model_swap/data/rl.parquet --save-dir /data/agastyas/nla_cross_model_swap/rl --num-steps 2100 --batch-prompts 256 --group-size 8 --max-new-tokens 256 --attn-implementation eager --lr 1e-4 --critic-lr 8e-5 --train-critic --gradient-checkpointing --logp-micro-batch 4 --critic-micro-batch 8 --vllm-gpu-mem 0.30 --vllm-tp 1 --vllm-max-len 1024 --ipc-weight-sync --vllm-max-num-seqs 128 --vllm-max-batched-tokens 4096 --evals base_fve --eval-every 50 --eval-n-prompts 128 --save-every 100 --assert-param-sync --seed 42 --no-wandb "
+    },
+    {
+      "pid": 2936745,
+      "ppid": 2936615,
+      "start": "110266959",
+      "state": "R",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -u -m nla.train_rl_vllm --base-ckpt /data/agastyas/nla_cross_model_swap/checkpoints/gemma2-base --av-ckpt /data/agastyas/nla_cross_model_swap/av_merged --av-adapter /data/agastyas/nla_cross_model_swap/sft_av/iter_0001411 --ar-ckpt /data/agastyas/nla_cross_model_swap/sft_ar/iter_0001427 --rl-parquet /data/agastyas/nla_cross_model_swap/data/rl.parquet --eval-parquet /data/agastyas/nla_cross_model_swap/data/av_val.parquet --sidecar /data/agastyas/nla_cross_model_swap/data/rl.parquet --save-dir /data/agastyas/nla_cross_model_swap/rl --num-steps 2100 --batch-prompts 256 --group-size 8 --max-new-tokens 256 --attn-implementation eager --lr 1e-4 --critic-lr 8e-5 --train-critic --gradient-checkpointing --logp-micro-batch 4 --critic-micro-batch 8 --vllm-gpu-mem 0.30 --vllm-tp 1 --vllm-max-len 1024 --ipc-weight-sync --vllm-max-num-seqs 128 --vllm-max-batched-tokens 4096 --evals base_fve --eval-every 50 --eval-n-prompts 128 --save-every 100 --assert-param-sync --seed 42 --no-wandb "
+    },
+    {
+      "pid": 2936746,
+      "ppid": 2936615,
+      "start": "110266959",
+      "state": "S",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -u -m nla.train_rl_vllm --base-ckpt /data/agastyas/nla_cross_model_swap/checkpoints/gemma2-base --av-ckpt /data/agastyas/nla_cross_model_swap/av_merged --av-adapter /data/agastyas/nla_cross_model_swap/sft_av/iter_0001411 --ar-ckpt /data/agastyas/nla_cross_model_swap/sft_ar/iter_0001427 --rl-parquet /data/agastyas/nla_cross_model_swap/data/rl.parquet --eval-parquet /data/agastyas/nla_cross_model_swap/data/av_val.parquet --sidecar /data/agastyas/nla_cross_model_swap/data/rl.parquet --save-dir /data/agastyas/nla_cross_model_swap/rl --num-steps 2100 --batch-prompts 256 --group-size 8 --max-new-tokens 256 --attn-implementation eager --lr 1e-4 --critic-lr 8e-5 --train-critic --gradient-checkpointing --logp-micro-batch 4 --critic-micro-batch 8 --vllm-gpu-mem 0.30 --vllm-tp 1 --vllm-max-len 1024 --ipc-weight-sync --vllm-max-num-seqs 128 --vllm-max-batched-tokens 4096 --evals base_fve --eval-every 50 --eval-n-prompts 128 --save-every 100 --assert-param-sync --seed 42 --no-wandb "
+    },
+    {
+      "pid": 2938376,
+      "ppid": 2936743,
+      "start": "110270570",
+      "state": "S",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -c from multiprocessing.resource_tracker import main;main(96) "
+    },
+    {
+      "pid": 2938377,
+      "ppid": 2936743,
+      "start": "110270570",
+      "state": "R",
+      "command": "VLLM::EngineCore                                                                                                                                                      "
+    },
+    {
+      "pid": 2938387,
+      "ppid": 2936742,
+      "start": "110270589",
+      "state": "S",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -c from multiprocessing.resource_tracker import main;main(96) "
+    },
+    {
+      "pid": 2938388,
+      "ppid": 2936742,
+      "start": "110270589",
+      "state": "R",
+      "command": "VLLM::EngineCore                                                                                                                                                      "
+    },
+    {
+      "pid": 2938395,
+      "ppid": 2936741,
+      "start": "110270593",
+      "state": "S",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -c from multiprocessing.resource_tracker import main;main(96) "
+    },
+    {
+      "pid": 2938396,
+      "ppid": 2936741,
+      "start": "110270593",
+      "state": "R",
+      "command": "VLLM::EngineCore                                                                                                                                                      "
+    },
+    {
+      "pid": 2938405,
+      "ppid": 2936746,
+      "start": "110270608",
+      "state": "S",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -c from multiprocessing.resource_tracker import main;main(96) "
+    },
+    {
+      "pid": 2938406,
+      "ppid": 2936746,
+      "start": "110270608",
+      "state": "R",
+      "command": "VLLM::EngineCore                                                                                                                                                      "
+    },
+    {
+      "pid": 2938412,
+      "ppid": 2936744,
+      "start": "110270611",
+      "state": "S",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -c from multiprocessing.resource_tracker import main;main(96) "
+    },
+    {
+      "pid": 2938413,
+      "ppid": 2936744,
+      "start": "110270611",
+      "state": "R",
+      "command": "VLLM::EngineCore                                                                                                                                                      "
+    },
+    {
+      "pid": 2938423,
+      "ppid": 2936745,
+      "start": "110270620",
+      "state": "S",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -c from multiprocessing.resource_tracker import main;main(96) "
+    },
+    {
+      "pid": 2938424,
+      "ppid": 2936745,
+      "start": "110270620",
+      "state": "R",
+      "command": "VLLM::EngineCore                                                                                                                                                      "
+    },
+    {
+      "pid": 2938430,
+      "ppid": 2936740,
+      "start": "110270622",
+      "state": "S",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -c from multiprocessing.resource_tracker import main;main(96) "
+    },
+    {
+      "pid": 2938431,
+      "ppid": 2936740,
+      "start": "110270622",
+      "state": "R",
+      "command": "VLLM::EngineCore                                                                                                                                                      "
+    },
+    {
+      "pid": 2938543,
+      "ppid": 2936739,
+      "start": "110270795",
+      "state": "S",
+      "command": "/data/agastyas/nla_cross_model_swap/venv/bin/python -c from multiprocessing.resource_tracker import main;main(102) "
+    },
+    {
+      "pid": 2938544,
+      "ppid": 2936739,
+      "start": "110270795",
+      "state": "R",
+      "command": "VLLM::EngineCore                                                                                                                                                        "
+    }
+  ],
+  "gpu_compute_processes_after_stop": "",
+  "stochastic_resume": "Weights, optimizer moments and deterministic data cursor preserved. Exact generation RNG state was not saved by this trainer; continuation is not bitwise identical."
+}

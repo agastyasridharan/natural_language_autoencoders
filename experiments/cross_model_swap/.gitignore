@@ -1,0 +1,21 @@
+# Generated run artifacts and credentials stay outside Git.
+__pycache__/
+*.pyc
+.env
+.env.*
+venv/
+uv_cache/
+checkpoints/
+sft_av/
+sft_ar/
+av_merged/
+rl/
+data/
+shards/
+logs/
+pause_snapshots/
+*.parquet
+*.safetensors
+*.pt
+*urls*.json
+*.incomplete

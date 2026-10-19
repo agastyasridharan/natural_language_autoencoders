@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "attention": "eager",
+  "results": [
+    {
+      "mean_abs_logp_difference": 0.01808491162955761,
+      "max_abs_logp_difference": 0.15260028839111328,
+      "steer_verified": true,
+      "tokens": 32
+    },
+    {
+      "mean_abs_logp_difference": 0.01889917626976967,
+      "max_abs_logp_difference": 0.12122488021850586,
+      "steer_verified": true,
+      "tokens": 32
+    }
+  ],
+  "ipc_weight_sync_verified": true,
+  "sync_seconds": 0.11934113502502441,
+  "synced_results": [
+    {
+      "mean_abs_logp_difference": 0.017163217067718506,
+      "max_abs_logp_difference": 0.10774517059326172
+    },
+    {
+      "mean_abs_logp_difference": 0.02173151634633541,
+      "max_abs_logp_difference": 0.13238650560379028
+    }
+  ]
+}

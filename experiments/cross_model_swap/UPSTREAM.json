@@ -1,0 +1,13 @@
+{
+  "repository": "https://github.com/asherps/EasyNLA",
+  "commit": "4d728477960c18cdfa36dc04ec738d7f55af9f0b",
+  "license": "MIT; see EasyNLA/LICENSE",
+  "packaging": "Vendored source snapshot, including experiment changes; no nested git repository.",
+  "modified_from_upstream": [
+    "nla/config.py",
+    "nla/train_rl_vllm.py",
+    "nla/train_sft.py",
+    "utils/patch_vllm_lens.py",
+    "nla/utils/cross_model.py"
+  ]
+}
